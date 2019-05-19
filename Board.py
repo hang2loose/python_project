@@ -38,7 +38,7 @@ class Ship:
 
 
 class Player:
-    def __init__(self, board: Board, ships: list):
+    def __init__(self, board: tuple, ships: list):
         self.board = board
         self.ships = ships
 
