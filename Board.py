@@ -58,3 +58,19 @@ class Player:
             self.board[pos[0]][pos[1]].state = "hit"
         else:
             self.board[pos[0]][pos[1]].state = "missed"
+
+
+class Game:
+    def __init__(self):
+        board_A = Board(10).create_board()
+        board_B = Board(10).create_board()
+
+        ships_A = [Ship(2, board_A), Ship(2, board_A), Ship(4, board_A)]
+        ships_B = [Ship(2, board_B), Ship(2, board_B), Ship(4, board_B)]
+
+        self.player_A = Player(board_A, ships_A)
+        self.player_B = Player(board_B, ships_B)
+
+    def players_set_ship(self):
+        self.player_A.set_ships()
+        self.player_B.set_ships()
