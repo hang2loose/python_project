@@ -15,24 +15,26 @@ class Board:
 
 
 class Ship:
-    def __init__(self, size: int, pos: int, horizontal: bool, board: tuple):
-        self.occupied_fields = None
+    def __init__(self, size: int, board: tuple):
+        self.occupied_fields = []
         self.size = size
         self.board = board
-        self.horizontal = horizontal
-        self.pos = pos
 
-    def set_ship(self, size: int):
-        for i in range(size - 1):
-            if self.horizontal:
-                if self.board[self.pos + 1][self.pos].occupied:
-                    self.occupied_fields = None
+    def set_ship(self, pos: tuple, horizontal: bool):
+        for i in range(self.size - 1):
+            if horizontal:
+                if self.board[pos[0] + 1][pos[1]].occupied:
+                    self.occupied_fields = []
                     return
-                self.occupied_fields.append(self.board[self.pos + 1][self.pos])
+                self.occupied_fields.append(self.board[pos[0] + 1][pos[1]])
             else:
-                if self.board[self.pos + 1][self.pos].occupied:
-                    self.occupied_fields = None
+                if self.board[pos[0] + 1][pos[1]].occupied:
+                    self.occupied_fields = []
                     return
-                self.occupied_fields.append(self.board[self.pos][self.pos + 1])
+                self.occupied_fields.append(self.board[pos[0]][pos[1] + 1])
         for field in self.occupied_fields:
             field.occupied = True
+        return self
+
+
+board = Board(6).create_board()
