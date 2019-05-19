@@ -37,4 +37,24 @@ class Ship:
         return self
 
 
-board = Board(6).create_board()
+class Player:
+    def __init__(self, board: Board, ships: list):
+        self.board = board
+        self.ships = ships
+
+    def set_ships(self):
+        for ship in self.ships:
+            x_pos = int(input("Xpos: "))
+            y_pos = int(input("Ypos: "))
+            pos = (x_pos, y_pos)
+            ship.set_ship(pos, True)
+
+    def shoot(self):
+        x_pos = int(input("Xpos: "))
+        y_pos = int(input("Ypos: "))
+        pos = (x_pos, y_pos)
+
+        if self.board[pos[0]][pos[1]].occupied and self.board[pos[0]][pos[1]].state is "empty":
+            self.board[pos[0]][pos[1]].state = "hit"
+        else:
+            self.board[pos[0]][pos[1]].state = "missed"
