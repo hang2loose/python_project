@@ -10,9 +10,6 @@ class Board:
     def create_board(self):
         return tuple([tuple([Field() for column in range(self.size)]) for row in range(self.size)])
 
-    def draw_board(self):
-        pass
-
 
 class Ship:
     def __init__(self, size: int, board: tuple):
@@ -59,18 +56,28 @@ class Player:
         else:
             self.board[pos[0]][pos[1]].state = "missed"
 
+    def draw_board(self):
+        pass
+
 
 class Game:
     def __init__(self):
-        board_A = Board(10).create_board()
-        board_B = Board(10).create_board()
+        board_a = Board(10).create_board()
+        board_b = Board(10).create_board()
 
-        ships_A = [Ship(2, board_A), Ship(2, board_A), Ship(4, board_A)]
-        ships_B = [Ship(2, board_B), Ship(2, board_B), Ship(4, board_B)]
+        ships_A = [Ship(2, board_a), Ship(2, board_a), Ship(4, board_a)]
+        ships_B = [Ship(2, board_b), Ship(2, board_b), Ship(4, board_b)]
 
-        self.player_A = Player(board_A, ships_A)
-        self.player_B = Player(board_B, ships_B)
+        self.player_A = Player(board_a, ships_A)
+        self.player_B = Player(board_b, ships_B)
 
     def players_set_ship(self):
         self.player_A.set_ships()
         self.player_B.set_ships()
+
+    def play(self):
+        self.players_set_ship()
+        player_a_turn = True
+        while True:
+            player_a_turn if self.player_A.shoot() else self.player_B.shoot()
+            player_a_turn = not player_a_turn
