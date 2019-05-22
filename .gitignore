@@ -105,3 +105,6 @@ venv.bak/
 
 # jetbrains spez
 .idea
+
+#MacOS
+.DS_Store
