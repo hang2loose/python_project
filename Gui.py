@@ -13,10 +13,12 @@ class Battleships:
         self.water = [self.water1, self.water2, self.water3]
 
         self.button = Button(root, image=random.choice(self.water), height=32, width=32,
-                             command=lambda: root.config(image=self.fire)).grid(row=1)
+                             command=lambda: self.button.configure(image=self.fire))
+        self.button.grid(row=1)
 
 
 root = Tk()
+root.state('zoomed')
 
 Label(root, text="Header").grid(row=0, columnspan=10)
 
