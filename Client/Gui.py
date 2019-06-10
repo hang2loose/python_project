@@ -1,7 +1,27 @@
 import random
 import socket
-from Client import Handler
+import json
 from appJar import gui
+
+
+class Handler:
+    def __init__(self, gui_functions: dict):
+        self.gui_functions = gui_functions
+
+    def extract(self, typ, load):
+        self.gui_functions[typ].__call__(load)
+
+    def receive(self, data):
+        data = json.loads(data)
+        self.extract(data["event"], str(data["load"]))
+
+    def send(self, pos, state):
+        data = {
+            "state": state,
+            "event": "hit",
+            "load": pos
+        }
+        self.gui_functions["send"].__call__(json.dumps(data))
 
 
 class GUI:
@@ -9,6 +29,14 @@ class GUI:
 
     def __init__(self, appJar):
         self.sock.connect(("127.0.0.1", 8080))
+
+        self.functions = {
+            "board": self.board,
+            "set": self.set,
+            "hit": self.hit,
+            "miss": self.miss,
+            "send": self.send
+        }
 
         self.state = "game"
         self.handler = Handler(self.functions)
@@ -22,22 +50,18 @@ class GUI:
 
         self.gui.thread(self.receive)
 
-        self.functions = {
-            "hit": self.hit
-        }
-
     def receive(self):
         while True:
             data = self.sock.recv(1024)
             if not data:
                 break
-            self.gui.setImage(str(data, 'utf-8'), "fire.gif")
+            self.handler.receive(str(data, 'utf-8'))
 
-    def send(self, title):
-        self.sock.send(bytes(title, 'utf-8'))
+    def send(self, data):
+        self.sock.send(bytes(data, 'utf-8'))
 
     def set(self, pos):
-        pass
+        self.handler.send(pos, self.state)
 
     def board(self):
         return 10
