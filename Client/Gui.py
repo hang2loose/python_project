@@ -1,6 +1,6 @@
 import random
 import socket
-
+from Client import Handler
 from appJar import gui
 
 
@@ -11,6 +11,7 @@ class GUI:
         self.sock.connect(("127.0.0.1", 8080))
 
         self.state = "game"
+        self.handler = Handler(self.functions)
 
         self.gui = appJar
         self.gui.setTitle("Battleships")
@@ -20,6 +21,10 @@ class GUI:
         self.water = ["dark.gif", "medium.gif", "light.gif"]
 
         self.gui.thread(self.receive)
+
+        self.functions = {
+            "hit": self.hit
+        }
 
     def receive(self):
         while True:
@@ -38,7 +43,7 @@ class GUI:
         return 10
 
     def hit(self, pos):
-        pass
+        self.gui.setImage(pos, "fire.gif")
 
     def miss(self, pos):
         pass
