@@ -1,5 +1,6 @@
 import socket
 import threading
+import json
 
 
 class Client:
@@ -7,7 +8,12 @@ class Client:
 
   def sendMsg(self):
     while True:
-      self.sock.send(bytes(input(""), 'utf-8'))
+      temp = {
+        "type" : "hit",
+        "load" : input("")
+      }
+
+      self.sock.send(bytes(json.dumps(temp), 'utf-8'))
 
   def __init__(self):
     self.sock.connect(("127.0.0.1", 8080))
