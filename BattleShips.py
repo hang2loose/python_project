@@ -1,13 +1,22 @@
 from enum import Enum
 
+class FIELD_STATE(Enum):
+    EMPTY = "O"
+    SHIP_ALIVE = "[]"
+    SHIP_HIT = "X"
+    MISS = "M"
+
 class Field:
-    occupied = False
     state = "empty"
 
+    def __init__(self,):
+        self.state = FIELD_STATE.EMPTY
+
+    def change_field_state(self, state: FIELD_STATE):
+        self.state = state
+
     def print_field(self):
-        if not self.occupied:
-            return "O"
-        return "X"
+        return self.state.value
 
 
 class Board:
@@ -83,8 +92,3 @@ class Game:
 
     def print_board(self):
         self.board1.print_board()
-
-
-board = Board(10)
-board.print_board()
-ship1 = ship1
