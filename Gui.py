@@ -1,5 +1,6 @@
 import random
-from BattleShips import Board
+from BattleShips import Board, Field
+from BattleShipsEnums import *
 from appJar import gui
 
 
@@ -16,6 +17,7 @@ class Game:
 
     def fire_at_pos(self, title):
         self.gui.setImage(title, "fire.gif")
+        print(title)
 
     def draw_board(self):
 
@@ -24,8 +26,8 @@ class Game:
         for row in range(len(self.board)):
             for column in range(len(self.board)):
                 self.gui.setSticky("nesw")
-                self.gui.addImage(str(column) + ", " + str(row), random.choice(self.water), row, column)
-                self.gui.setImageSubmitFunction(str(column) + ", " + str(row), self.fire_at_pos)
+                self.gui.addImage("{},{}".format(column, row), random.choice(self.water), column, row)
+                self.gui.setImageSubmitFunction("{},{}".format(column, row), self.fire_at_pos)
 
         self.gui.stopLabelFrame()
 
