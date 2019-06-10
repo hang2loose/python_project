@@ -18,6 +18,9 @@ class Field:
     def print_field(self):
         return self.state.value
 
+    def get_state(self):
+        return self.state
+
 
 class Board:
     def __init__(self, size: int):
