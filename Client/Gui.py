@@ -44,12 +44,12 @@ class Parser:
 
 
 class GUI:
-    def __init__(self, appJar):
-        self.gui = appJar
+    def __init__(self, framework):
+        self.gui = framework
 
         self.state = "game"
         self.gui.setImageLocation("./Client/images")
-        
+
         self.water = [
             "dark.gif",
             "medium.gif",
