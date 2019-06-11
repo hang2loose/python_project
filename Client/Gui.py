@@ -27,6 +27,9 @@ class Parser:
         self.functions = functions
         self.connection_handler = ConnectionHandler(self)
 
+    def listener(self):
+        self.connection_handler.receive()
+
     def extract(self, event, load):
         self.functions[event].__call__(load)
 
@@ -41,6 +44,7 @@ class Parser:
             "load": pos
         }
         self.connection_handler.send(json.dumps(data))
+
 
 
 class GUI:
@@ -64,7 +68,7 @@ class GUI:
 
         self.parser = Parser(self.functions)
 
-        self.gui.thread(self.parser.connection_handler.receive)
+        self.gui.thread(self.parser.listener)
 
     def set(self, pos):
         self.parser.send_data(pos, self.state)
