@@ -48,7 +48,6 @@ class GUI:
         self.gui = framework
 
         self.state = "game"
-        self.gui.setImageLocation("./Client/images")
 
         self.water = [
             "dark.gif",
@@ -82,6 +81,7 @@ class GUI:
     def draw_framework(self):
         self.gui.setTitle("Battleships")
         self.gui.setLocation("CENTER")
+        self.gui.setImageLocation("./Client/images")
 
         self.gui.startLabelFrame("State", 0)
         self.gui.addLabel("l1", "Label 1")
