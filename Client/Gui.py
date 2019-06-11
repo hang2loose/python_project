@@ -4,7 +4,7 @@ import json
 from appJar import gui
 
 
-class Handler:
+class ConnectionHandler:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def __init__(self, parser):
@@ -16,7 +16,7 @@ class Handler:
             data = self.sock.recv(1024)
             if not data:
                 break
-            self.parser.receive(str(data, 'utf-8'))
+            self.parser.receive_data(str(data, 'utf-8'))
 
     def send(self, data):
         self.sock.send(bytes(data, 'utf-8'))
@@ -25,26 +25,36 @@ class Handler:
 class Parser:
     def __init__(self, functions: dict):
         self.functions = functions
+        self.connection_handler = ConnectionHandler(self)
 
     def extract(self, event, load):
         self.functions[event].__call__(load)
 
-    def receive(self, data):
+    def receive_data(self, data):
         data = json.loads(data)
         self.extract(data["event"], str(data["load"]))
 
-    def send(self, pos, state):
+    def send_data(self, pos, state):
         data = {
             "state": state,
             "event": "hit",
             "load": pos
         }
-        self.functions["send"].__call__(json.dumps(data))
+        self.connection_handler.send(json.dumps(data))
 
 
 class GUI:
     def __init__(self, appJar):
         self.gui = appJar
+
+        self.state = "game"
+        self.gui.setImageLocation("./Client/images")
+        
+        self.water = [
+            "dark.gif",
+            "medium.gif",
+            "light.gif"
+        ]
 
         self.functions = {
             "board": self.board,
@@ -54,18 +64,11 @@ class GUI:
         }
 
         self.parser = Parser(self.functions)
-        self.handler = Handler(self.parser)
 
-        self.functions.update({"send": self.handler.send})
-
-        self.state = "game"
-        self.gui.setImageLocation("./Client/images")
-        self.water = ["dark.gif", "medium.gif", "light.gif"]
-
-        self.gui.thread(self.handler.receive)
+        self.gui.thread(self.parser.connection_handler.receive)
 
     def set(self, pos):
-        self.parser.send(pos, self.state)
+        self.parser.send_data(pos, self.state)
 
     def board(self):
         return 10
