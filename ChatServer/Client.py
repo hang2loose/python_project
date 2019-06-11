@@ -9,7 +9,7 @@ class Client:
   def sendMsg(self):
     while True:
       temp = {
-        "type" : "hit",
+        "event" : "miss",
         "load" : input("")
       }
 
