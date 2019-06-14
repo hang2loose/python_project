@@ -50,7 +50,7 @@ class Parser:
 class GUI:
     def __init__(self, framework):
         self.gui = framework
-
+        self.coords = {}
         self.state = "game"
 
         self.water = [
@@ -71,20 +71,25 @@ class GUI:
         self.gui.thread(self.parser.listener)
 
     def set(self, pos):
-        self.parser.send_data(pos, self.state)
+        if pos[:7] != "UNKNOWN":
+            self.parser.send_data(pos, self.state)
 
     def board(self):
         return 10
 
     def hit(self, pos):
-        self.gui.setImage(pos, "hit.gif")
+        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][1] + 16, "hit.gif")
 
     def miss(self, pos):
-        self.gui.setImage(pos, "miss.gif")
+        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][1] + 16, "miss.gif")
 
     def draw_framework(self):
         self.gui.setTitle("Battleships")
+        self.gui.setResizable(canResize=False)
         self.gui.setLocation("CENTER")
+        self.gui.setStretch("None")
+
+        self.gui.setGuiPadding(100, 20)
         self.gui.setImageLocation("./Client/images")
 
         self.gui.startLabelFrame("State", 0)
@@ -96,14 +101,26 @@ class GUI:
         self.gui.stopLabelFrame()
 
     def draw_board(self):
-        self.gui.startLabelFrame("Game Board", 1)
+        self.gui.startFrame("Game", 1)
 
+        self.gui.addCanvas("Board")
+        self.gui.setCanvasWidth("Board", 352)
+        self.gui.setCanvasHeight("Board", 352)
+
+        self.gui.addCanvasImage("Board", 192, 16, "top_bar.gif")
+        self.gui.addCanvasImage("Board", 16, 192, "left_bar.gif")
+
+        x = 16
         for row in range(self.board()):
+            x += 32
+            y = 16
             for column in range(self.board()):
-                self.gui.addImage("{},{}".format(column, row), random.choice(self.water), column, row)
-                self.gui.setImageSubmitFunction("{},{}".format(column, row), self.set)
+                y += 32
+                self.gui.addCanvasImage("Board", x, y, random.choice(self.water))
+                self.coords.update({"{},{}".format(row, column): [x-16, y-16, x+16, y+16]})
 
-        self.gui.stopLabelFrame()
+        self.gui.setCanvasMap("Board", self.set, self.coords)
+        self.gui.stopFrame()
 
 
 app = gui()
