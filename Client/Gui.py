@@ -83,22 +83,14 @@ class GUI:
     def miss(self, pos):
         self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][1] + 16, "miss.gif")
 
-    def draw_framework(self):
+    def draw_parameters(self):
         self.gui.setTitle("Battleships")
         self.gui.setResizable(canResize=False)
         self.gui.setLocation("CENTER")
-        self.gui.setStretch("None")
 
+        self.gui.setStretch("None")
         self.gui.setGuiPadding(100, 20)
         self.gui.setImageLocation("./Client/images")
-
-        self.gui.startLabelFrame("State", 0)
-        self.gui.addLabel("l1", "Label 1")
-        self.gui.stopLabelFrame()
-
-        self.gui.startLabelFrame("Logic", 2)
-        self.gui.addLabel("l2", "Label 2")
-        self.gui.stopLabelFrame()
 
     def draw_board(self):
         self.gui.startFrame("Game", 1)
@@ -120,11 +112,23 @@ class GUI:
                 self.coords.update({"{},{}".format(row, column): [x-16, y-16, x+16, y+16]})
 
         self.gui.setCanvasMap("Board", self.set, self.coords)
+
         self.gui.stopFrame()
+
+    def draw(self):
+        self.draw_parameters()
+
+        self.gui.startLabelFrame("State", 0)
+        self.gui.addLabel("l1", "Label 1")
+        self.gui.stopLabelFrame()
+
+        self.draw_board()
+
+        self.gui.startLabelFrame("Logic", 2)
+        self.gui.addLabel("l2", "Label 2")
+        self.gui.stopLabelFrame()
 
 
 app = gui()
-gui = GUI(app)
-gui.draw_framework()
-gui.draw_board()
+GUI(app).draw()
 app.go()
