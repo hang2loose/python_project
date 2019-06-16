@@ -72,11 +72,6 @@ class Player:
     def print_player_board(self):
         return self.player_board.print_board()
 
-    def set_ships_on_board(self, ship: Ship, pos: tuple):
-        if self.player_board.set_ship_on_board(ship, pos) is True:
-            return True
-        return False
-
     def recive_shot(self, pos: tuple):
         field = self.player_board.get_field(pos)
 
@@ -93,6 +88,18 @@ class Player:
             return
         field.change_field_state(FIELD_STATE.MISS)
         return
+
+    def player_alive(self):
+        for ship_type in self.player_ships:
+            for ship in ship_type:
+                if ship.is_ship_alive():
+                    return True
+        return False
+
+    def set_ships_on_board(self, ship: Ship, pos: tuple):
+        if self.player_board.set_ship_on_board(ship, pos) is True:
+            return True
+        return False
 
 
 class Game:
