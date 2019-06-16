@@ -1,54 +1,92 @@
 import random
 import socket
-from Client import Handler
+import json
 from appJar import gui
 
 
-class GUI:
+class ConnectionHandler:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def __init__(self, appJar):
+    def __init__(self, parser):
         self.sock.connect(("127.0.0.1", 8080))
-
-        self.state = "game"
-        self.handler = Handler(self.functions)
-
-        self.gui = appJar
-        self.gui.setTitle("Battleships")
-        self.gui.setLocation("CENTER")
-
-        self.gui.setImageLocation("./Client/images")
-        self.water = ["dark.gif", "medium.gif", "light.gif"]
-
-        self.gui.thread(self.receive)
-
-        self.functions = {
-            "hit": self.hit
-        }
+        self.parser = parser
 
     def receive(self):
         while True:
             data = self.sock.recv(1024)
             if not data:
                 break
-            self.gui.setImage(str(data, 'utf-8'), "fire.gif")
+            self.parser.receive_data(str(data, 'utf-8'))
 
-    def send(self, title):
-        self.sock.send(bytes(title, 'utf-8'))
+    def send(self, data):
+        self.sock.send(bytes(data, 'utf-8'))
+
+
+class Parser:
+    def __init__(self, functions: dict):
+        self.functions = functions
+        self.connection_handler = ConnectionHandler(self)
+
+    def listener(self):
+        self.connection_handler.receive()
+
+    def extract(self, event, load):
+        self.functions[event].__call__(load)
+
+    def receive_data(self, data):
+        data = json.loads(data)
+        self.extract(data["event"], str(data["load"]))
+
+    def send_data(self, pos, state):
+        data = {
+            "state": state,
+            "event": "hit",
+            "load": pos
+        }
+        self.connection_handler.send(json.dumps(data))
+
+
+
+class GUI:
+    def __init__(self, framework):
+        self.gui = framework
+
+        self.state = "game"
+
+        self.water = [
+            "dark.gif",
+            "medium.gif",
+            "light.gif"
+        ]
+
+        self.functions = {
+            "board": self.board,
+            "set": self.set,
+            "hit": self.hit,
+            "miss": self.miss
+        }
+
+        self.parser = Parser(self.functions)
+
+        self.gui.thread(self.parser.listener)
 
     def set(self, pos):
-        pass
+        self.parser.send_data(pos, self.state)
 
     def board(self):
         return 10
 
     def hit(self, pos):
-        self.gui.setImage(pos, "fire.gif")
+        self.gui.setImage(pos, "hit.gif")
 
     def miss(self, pos):
-        pass
+        self.gui.setImage(pos, "miss.gif")
 
     def draw_framework(self):
+        self.gui.setTitle("Battleships")
+        self.gui.setLocation("CENTER")
+        self.gui.setImageLocation("./Client/images")
+
         self.gui.startLabelFrame("State", 0)
         self.gui.addLabel("l1", "Label 1")
         self.gui.stopLabelFrame()
