@@ -70,11 +70,17 @@ class Board:
 
     def __get_ship_fields(self, ship: Ship, pos: tuple):
         if ship.get_orientation() == SHIP_ORIENTATION.HORIZONTAL:
-            return [self.get_field((pos[0], h)) for h in range(ship.get_size() - 1)]
-        return [self.get_field((v, pos[1])) for v in range(ship.get_size())]
+            return [self.__get_field((pos[0], h)) for h in range(ship.get_size() - 1)]
+        return [self.__get_field((v, pos[1])) for v in range(ship.get_size())]
 
-    def get_field(self, pos: tuple):
+    def __get_field(self, pos: tuple):
         return self.__board[pos[0]][pos[1]]
+
+    def get_field_state(self, pos: tuple):
+        return self.__get_field(pos).get_state()
+
+    def change_field_state(self, pos: tuple, new_state: FIELD_STATE):
+        self.__get_field(pos).change_field_state(new_state)
 
 
 class Player:
@@ -95,21 +101,18 @@ class Player:
         self.__enemy_board.print_board()
 
     def recive_shot(self, pos: tuple):
-        field = self.__player_board.get_field(pos)
-
-        if field.get_state() is FIELD_STATE.SHIP_ALIVE:
-            field.change_field_state(FIELD_STATE.SHIP_HIT)
+        if self.__player_board.get_field_state(pos) is FIELD_STATE.SHIP_ALIVE:
+            self.__player_board.change_field_state(pos, FIELD_STATE.SHIP_HIT)
             return "hit"
-        field.change_field_state(FIELD_STATE.MISS)
+        self.__player_board.change_field_state(pos, FIELD_STATE.MISS)
         return "miss"
 
     def shoot_at(self, pos: tuple, player):
-        field = self.__enemy_board.get_field(pos)
         event = player.recive_shot(pos)
         if event is "hit":
-            field.change_field_state(FIELD_STATE.SHIP_HIT)
+            self.__enemy_board.change_field_state(pos, FIELD_STATE.SHIP_HIT)
             return
-        field.change_field_state(FIELD_STATE.MISS)
+        self.__enemy_board.change_field_state(pos, FIELD_STATE.MISS)
         return
 
     def player_alive(self):
@@ -151,7 +154,7 @@ class Game:
         self.print_game_state()
 
         while True:
-            pos = (int(input("x: ")), int(input("y: ")))
+            pos = (int(input("y: ")), int(input("x: ")))
             if player_a_turn:
                 self.player_A.shoot_at(pos, self.player_B)
             else:
