@@ -2,8 +2,6 @@ from BattleShipsEnums import *
 
 
 class Field:
-    state = "empty"
-
     def __init__(self, ):
         self.state = FIELD_STATE.EMPTY
 
@@ -25,13 +23,17 @@ class Ship:
         self.orientation = SHIP_ORIENTATION.HORIZONTAL
 
     def is_ship_alive(self):
-        pass
+        for field in self.occupied_fields:
+            if field.state is FIELD_STATE.SHIP_ALIVE:
+                return True
+        return False
 
     def switch_orientation(self):
         if self.orientation is SHIP_ORIENTATION.HORIZONTAL:
             self.orientation = SHIP_ORIENTATION.VERTIKAL
         else:
             self.orientation = SHIP_ORIENTATION.HORIZONTAL
+        return self.orientation
 
 
 class Board:
@@ -48,8 +50,11 @@ class Board:
                 print("{} ".format(field.print_field()), end='')
             print()
 
-    def set_ship(self, ship: Ship):
+    def set_ship_on_board(self, ship: Ship, pos: tuple):
         return False
+
+    def get_field(self, pos: tuple):
+        return self.board[pos[0]][pos[1]]
 
 
 class Player:
@@ -64,8 +69,30 @@ class Player:
             tmp_ship_list.append([Ship(key) for i in range(ships_to_create[key])])
         return tuple(tmp_ship_list)
 
-    def get_board(self):
-        return self.player_board
+    def print_player_board(self):
+        return self.player_board.print_board()
+
+    def set_ship_on_board(self, ship: Ship):
+        if self.player_board.set_ship_on_board(ship) is True:
+            return True
+        return False
+
+    def recive_shot(self, pos: tuple):
+        field = self.player_board.get_field(pos)
+
+        if field.state is FIELD_STATE.SHIP_ALIVE:
+            field.change_field_state(FIELD_STATE.SHIP_HIT)
+            return "hit"
+        return "miss"
+
+    def shoot_at(self, pos: tuple, player):
+        field = self.player_board.get_field(pos)
+        event = player.recive_shot(pos)
+        if event is "hit":
+            field.change_field_state(FIELD_STATE.SHIP_HIT)
+            return
+        field.change_field_state(FIELD_STATE.MISS)
+        return
 
 
 class Game:
@@ -79,15 +106,15 @@ class Game:
     }
 
     def __init__(self):
-        self.board1 = Board(10)
         self.playerA = Player(self.gamerules)
         self.playerB = Player(self.gamerules)
 
     def start_game(self):
+        self.playerA.shoot_at((0,0), self.playerB)
         print("PlayerA:")
-        self.playerA.get_board().print_board()
+        self.playerA.print_player_board()
         print("\nPlayerB:")
-        self.playerA.get_board().print_board()
+        self.playerA.print_player_board()
 
 
 game = Game()
