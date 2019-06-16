@@ -72,8 +72,8 @@ class Player:
     def print_player_board(self):
         return self.player_board.print_board()
 
-    def set_ship_on_board(self, ship: Ship):
-        if self.player_board.set_ship_on_board(ship) is True:
+    def set_ships_on_board(self, ship: Ship, pos: tuple):
+        if self.player_board.set_ship_on_board(ship, pos) is True:
             return True
         return False
 
@@ -106,15 +106,25 @@ class Game:
     }
 
     def __init__(self):
-        self.playerA = Player(self.gamerules)
-        self.playerB = Player(self.gamerules)
+        self.player_A = Player(self.gamerules)
+        self.player_B = Player(self.gamerules)
 
     def start_game(self):
-        self.playerA.shoot_at((0,0), self.playerB)
+        player_a_turn = True
+        while True:
+            pos = (int(input("x: ")), int(input("y: ")))
+            if player_a_turn:
+                self.player_A.shoot_at(pos, self.player_B)
+            else:
+                self.player_B.shoot_at(pos, self.player_A)
+            self.print_game_state()
+            player_a_turn = not player_a_turn
+
+    def print_game_state(self):
         print("PlayerA:")
-        self.playerA.print_player_board()
+        self.player_A.print_player_board()
         print("\nPlayerB:")
-        self.playerA.print_player_board()
+        self.player_B.print_player_board()
 
 
 game = Game()
