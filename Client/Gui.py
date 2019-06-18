@@ -41,7 +41,7 @@ class Parser:
         data = {
             "state": state,
             "event": "hit",
-            "load": pos
+            "pos": pos
         }
         self.connection_handler.send(json.dumps(data))
 
