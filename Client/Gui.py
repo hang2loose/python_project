@@ -35,7 +35,7 @@ class Parser:
 
     def receive_data(self, data):
         data = json.loads(data)
-        self.extract(data["event"], str(data["load"]))
+        self.extract(data["event"], str(data["pos"]))
 
     def send_data(self, state, event_type, pos):
         data = {
