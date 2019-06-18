@@ -2,7 +2,7 @@ from enum import Enum
 
 class FIELD_STATE(Enum):
     EMPTY = "O"
-    SHIP_ALIVE = "[]"
+    SHIP_ALIVE = "S"
     SHIP_HIT = "X"
     MISS = "M"
 

@@ -37,11 +37,11 @@ class Parser:
         data = json.loads(data)
         self.extract(data["event"], str(data["load"]))
 
-    def send_data(self, pos, state):
+    def send_data(self, state, event_type, pos):
         data = {
             "state": state,
-            "event": "hit",
-            "load": pos
+            "event": event_type,
+            "pos": pos
         }
         self.connection_handler.send(json.dumps(data))
 
@@ -52,6 +52,7 @@ class GUI:
         self.gui = framework
         self.coords = {}
         self.state = "game"
+        self.event_type = "shoot"
 
         self.water = [
             "dark.gif",
@@ -72,7 +73,7 @@ class GUI:
 
     def set(self, pos):
         if pos[:7] != "UNKNOWN":
-            self.parser.send_data(pos, self.state)
+            self.parser.send_data(self.state, self.event_type, pos)
 
     def board(self):
         return 10
