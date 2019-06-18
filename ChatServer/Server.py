@@ -1,4 +1,5 @@
 import socket
+import json
 import threading
 
 
@@ -15,7 +16,7 @@ class Server:
             data = c.recv(1024)
             print(str(data))
             for connection in self.connections:
-                #connection.send(data)
+                self.send_to_client("hit", "1,1", connection)
                 if not data:
                     print(str(a[0]) + ":" + str(a[1]), "disconnected")
                     self.connections.remove(c)
@@ -31,14 +32,14 @@ class Server:
             self.connections.append(c)
             print(str(a[0]) + ":" + str(a[1]), "connected")
 
-    def send_to_client(self, type: str, pos: tuple, connection):
-        connection.send(self.__event_builder(type, pos))
+    def send_to_client(self, event_type: str, pos: str, connection):
+        connection.send(bytes(json.dumps(self.__event_builder(event_type, pos)), 'utf-8'))
 
-    def __event_builder(self, type: str, pos: tuple):
+    def __event_builder(self, event_type: str, pos: str):
         return {
             "state": "game",
-            "event_type": type,
-            "pos": list(pos)
+            "event_type": event_type,
+            "pos": pos
         }
 
 
