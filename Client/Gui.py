@@ -35,7 +35,8 @@ class Parser:
 
     def receive_data(self, data):
         data = json.loads(data)
-        self.extract(data["event"], str(data["pos"]))
+        print(data)
+        self.extract(data["event_type"], str(data["pos"]))
 
     def send_data(self, state, event_type, pos):
         data = {
@@ -79,10 +80,10 @@ class GUI:
         return 10
 
     def hit(self, pos):
-        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][1] + 16, "hit.gif")
+        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][2] + 16, "hit.gif")
 
     def miss(self, pos):
-        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][1] + 16, "miss.gif")
+        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][2] + 16, "miss.gif")
 
     def draw_parameters(self):
         self.gui.setTitle("Battleships")
