@@ -13,8 +13,9 @@ class Server:
     def handler(self, c, a):
         while True:
             data = c.recv(1024)
+            print(str(data))
             for connection in self.connections:
-                connection.send(data)
+                #connection.send(data)
                 if not data:
                     print(str(a[0]) + ":" + str(a[1]), "disconnected")
                     self.connections.remove(c)
