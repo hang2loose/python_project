@@ -50,7 +50,7 @@ class Parser:
 class GUI:
     def __init__(self, framework):
         self.gui = framework
-
+        self.coords = {}
         self.state = "game"
         self.event_type = "shoot"
 
@@ -72,43 +72,64 @@ class GUI:
         self.gui.thread(self.parser.listener)
 
     def set(self, pos):
-        self.parser.send_data(self.state, self.event_type, pos)
+        if pos[:7] != "UNKNOWN":
+            self.parser.send_data(self.state, self.event_type, pos)
 
     def board(self):
         return 10
 
     def hit(self, pos):
-        self.gui.setImage(pos, "hit.gif")
+        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][1] + 16, "hit.gif")
 
     def miss(self, pos):
-        self.gui.setImage(pos, "miss.gif")
+        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][1] + 16, "miss.gif")
 
-    def draw_framework(self):
+    def draw_parameters(self):
         self.gui.setTitle("Battleships")
+        self.gui.setResizable(canResize=False)
         self.gui.setLocation("CENTER")
+
+        self.gui.setStretch("None")
+        self.gui.setGuiPadding(100, 20)
         self.gui.setImageLocation("./Client/images")
+
+    def draw_board(self):
+        self.gui.startFrame("Game", 1)
+
+        self.gui.addCanvas("Board")
+        self.gui.setCanvasWidth("Board", 352)
+        self.gui.setCanvasHeight("Board", 352)
+
+        self.gui.addCanvasImage("Board", 192, 16, "top_bar.gif")
+        self.gui.addCanvasImage("Board", 16, 192, "left_bar.gif")
+
+        x = 16
+        for row in range(self.board()):
+            x += 32
+            y = 16
+            for column in range(self.board()):
+                y += 32
+                self.gui.addCanvasImage("Board", x, y, random.choice(self.water))
+                self.coords.update({"{},{}".format(row, column): [x-16, y-16, x+16, y+16]})
+
+        self.gui.setCanvasMap("Board", self.set, self.coords)
+
+        self.gui.stopFrame()
+
+    def draw(self):
+        self.draw_parameters()
 
         self.gui.startLabelFrame("State", 0)
         self.gui.addLabel("l1", "Label 1")
         self.gui.stopLabelFrame()
 
+        self.draw_board()
+
         self.gui.startLabelFrame("Logic", 2)
         self.gui.addLabel("l2", "Label 2")
         self.gui.stopLabelFrame()
 
-    def draw_board(self):
-        self.gui.startLabelFrame("Game Board", 1)
-
-        for row in range(self.board()):
-            for column in range(self.board()):
-                self.gui.addImage("{},{}".format(column, row), random.choice(self.water), column, row)
-                self.gui.setImageSubmitFunction("{},{}".format(column, row), self.set)
-
-        self.gui.stopLabelFrame()
-
 
 app = gui()
-gui = GUI(app)
-gui.draw_framework()
-gui.draw_board()
+GUI(app).draw()
 app.go()
