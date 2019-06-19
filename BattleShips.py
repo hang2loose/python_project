@@ -70,7 +70,7 @@ class Board:
 
     def __get_ship_fields(self, ship: Ship, pos: tuple):
         if ship.get_orientation() == SHIP_ORIENTATION.HORIZONTAL:
-            return [self.__get_field((pos[0], h)) for h in range(ship.get_size() - 1)]
+            return [self.__get_field((pos[0], h)) for h in range(ship.get_size())]
         return [self.__get_field((v, pos[1])) for v in range(ship.get_size())]
 
     def __get_field(self, pos: tuple):
