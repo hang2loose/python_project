@@ -80,29 +80,31 @@ class GUI:
         return 10
 
     def hit(self, pos):
-        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][2] + 16, "hit.gif")
+        self.gui.addCanvasImage("Target_Board", self.coords[pos][0] + 16, self.coords[pos][2] + 16, "hit.gif")
 
     def miss(self, pos):
-        self.gui.addCanvasImage("Board", self.coords[pos][0] + 16, self.coords[pos][2] + 16, "miss.gif")
+        self.gui.addCanvasImage("Target_Board", self.coords[pos][0] + 16, self.coords[pos][2] + 16, "miss.gif")
 
     def draw_parameters(self):
         self.gui.setTitle("Battleships")
         self.gui.setResizable(canResize=False)
         self.gui.setLocation("CENTER")
+        self.gui.setBg("#3C3F41")
+        self.gui.setFg("#BBBBBB")
 
         self.gui.setStretch("None")
         self.gui.setGuiPadding(100, 20)
         self.gui.setImageLocation("./Client/images")
 
     def draw_board(self):
-        self.gui.startFrame("Game", 1)
+        self.gui.startFrame("Ships", 1, 0)
 
-        self.gui.addCanvas("Board")
-        self.gui.setCanvasWidth("Board", 352)
-        self.gui.setCanvasHeight("Board", 352)
+        self.gui.addCanvas("Ships_Board")
+        self.gui.setCanvasWidth("Ships_Board", 352)
+        self.gui.setCanvasHeight("Ships_Board", 352)
 
-        self.gui.addCanvasImage("Board", 192, 16, "top_bar.gif")
-        self.gui.addCanvasImage("Board", 16, 192, "left_bar.gif")
+        self.gui.addCanvasImage("Ships_Board", 192, 16, "top_bar.gif")
+        self.gui.addCanvasImage("Ships_Board", 16, 192, "left_bar.gif")
 
         x = 16
         for row in range(self.board()):
@@ -110,23 +112,56 @@ class GUI:
             y = 16
             for column in range(self.board()):
                 y += 32
-                self.gui.addCanvasImage("Board", x, y, random.choice(self.water))
+                self.gui.addCanvasImage("Ships_Board", x, y, random.choice(self.water))
                 self.coords.update({"{},{}".format(row, column): [x-16, y-16, x+16, y+16]})
 
-        self.gui.setCanvasMap("Board", self.set, self.coords)
+        #self.gui.setCanvasMap("Set Board", self.set, self.coords)
+
+        self.gui.stopFrame()
+
+        self.gui.startFrame("Target", 1, 1)
+
+        self.gui.addCanvas("Target_Board")
+        self.gui.setCanvasWidth("Target_Board", 352)
+        self.gui.setCanvasHeight("Target_Board", 352)
+
+        self.gui.addCanvasImage("Target_Board", 160, 16, "top_bar.gif")
+        self.gui.addCanvasImage("Target_Board", 336, 192, "right_bar.gif")
+
+        x = -16
+        for row in range(self.board()):
+            x += 32
+            y = 16
+            for column in range(self.board()):
+                y += 32
+                self.gui.addCanvasImage("Target_Board", x, y, random.choice(self.water))
+                self.coords.update({"{},{}".format(row, column): [x - 16, y - 16, x + 16, y + 16]})
+
+        self.gui.setCanvasMap("Target_Board", self.set, self.coords)
 
         self.gui.stopFrame()
 
     def draw(self):
         self.draw_parameters()
 
-        self.gui.startLabelFrame("State", 0)
-        self.gui.addLabel("l1", "Label 1")
-        self.gui.stopLabelFrame()
+        self.gui.startFrame("State", 0, 0, 2)
+        self.gui.addLabel("Ships", "STRATEGY MAP", 0, 0)
+        self.gui.addLabel("Target", "TARGET MAP", 0, 1)
+
+        self.gui.getLabelWidget("Ships").config(font=("Helvetica", "20", "bold"))
+        self.gui.setLabelAlign("Ships", "left")
+        self.gui.setLabelSticky("Ships", "both")
+        self.gui.getLabelWidget("Target").config(font=("Helvetica", "20", "bold"))
+        self.gui.setLabelAlign("Target", "right")
+        self.gui.setLabelSticky("Target", "both")
+        self.gui.stopFrame()
 
         self.draw_board()
 
-        self.gui.startLabelFrame("Logic", 2)
+        self.gui.setFramePadding("Ships", [10, 10])
+        self.gui.setFramePadding("Target", [10, 10])
+
+        self.gui.startLabelFrame("Logic", 2, 0, 2)
         self.gui.addLabel("l2", "Label 2")
         self.gui.stopLabelFrame()
 
