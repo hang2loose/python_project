@@ -9,7 +9,7 @@ class EventHandler:
     def __init__(self, functions: dict):
         global function_dict
         function_dict = functions
-        self.sio.connect('http://192.168.0.59:8080')
+        self.sio.connect('http://localhost:8080')
 
     @sio.on('hit')
     def on_hit(self):

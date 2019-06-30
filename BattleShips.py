@@ -124,9 +124,10 @@ class Player:
         event = player.receive_shot(pos)
         if event is "hit":
             self.__enemy_board.change_field_state(pos, FIELD_STATE.SHIP_HIT)
-            return
-        self.__enemy_board.change_field_state(pos, FIELD_STATE.MISS)
-        return
+            return "hit"
+        if self.__enemy_board.get_field_state(pos) is not FIELD_STATE.SHIP_HIT:
+            self.__enemy_board.change_field_state(pos, FIELD_STATE.MISS)
+            return "miss"
 
     def player_alive(self):
         for ship_type in self.__player_ships:
@@ -169,6 +170,7 @@ class Game:
     def __init__(self):
         self.player_A = Player(self.gamerules)
         self.player_B = Player(self.gamerules)
+        self.start_game()
 
     def start_game(self):
         player_a_turn = True
@@ -176,8 +178,6 @@ class Game:
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
         self.player_A.set_ships_on_board()
         self.player_B.set_ships_on_board()
-
-        self.player_A.shoot_at((1, 1), self.player_B)
 
     def print_game_state(self):
         print("PlayerA:")

@@ -26,7 +26,9 @@ def disconnect(sid):
 @sio.on('shoot_at')
 def handle_player_shot(sid, payload):
     print("pizza " + payload)
-    sio.emit('hit', payload, room=sid)
+    pos = tuple(int(p) for p in payload.split(','))
+    sio.emit(battle_ships.player_A.shoot_at(pos, battle_ships.player_B), payload, sid)
+    battle_ships.print_game_state()
 
 
 if __name__ == '__main__':
