@@ -154,9 +154,6 @@ class Player:
 
 
 class Game:
-    # Starts SocketI/O server
-    sio = socketio.Server()
-
     # pre configrued game rules
     gamerules = {
         "boardsize": 10,
