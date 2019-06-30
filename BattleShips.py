@@ -87,7 +87,7 @@ class Board:
         return [self.__get_field((v, pos[1])) for v in range(ship.get_size())]
 
     def __get_field(self, pos: tuple):
-        return self.__board[pos[0]][pos[1]]
+        return self.__board[pos[1]][pos[0]]
 
     def get_field_state(self, pos: tuple):
         return self.__get_field(pos).get_state()
