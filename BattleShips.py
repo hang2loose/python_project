@@ -182,7 +182,6 @@ class Game:
         self.start_game()
 
     def start_game(self):
-        player_a_turn = True
 
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
         self.player_A.set_ships_random()
