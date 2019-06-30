@@ -149,7 +149,7 @@ class Player:
         return False
 
     def get_ship_events(self):
-        return [ship.to_event() for sublist in self.__player_board for ship in sublist]
+        return [ship.to_event() for sublist in self.__player_ships for ship in sublist]
 
     def set_ships_random(self):
         print("setting ships....")

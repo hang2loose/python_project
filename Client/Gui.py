@@ -93,7 +93,7 @@ class GUI:
 
         self.gui.setStretch("None")
         self.gui.setGuiPadding(100, 20)
-        self.gui.setImageLocation("./Client/images")
+        self.gui.setImageLocation("./images")
 
     def canvas_board(self, board_name):
         self.gui.addCanvas(board_name)
