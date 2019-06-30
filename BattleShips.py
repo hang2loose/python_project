@@ -1,3 +1,5 @@
+import socketio
+
 from BattleShipsEnums import *
 
 
@@ -132,6 +134,10 @@ class Player:
 
 
 class Game:
+    # Starts SocketI/O server
+    sio = socketio.Server()
+
+    # pre configrued game rules
     gamerules = {
         "boardsize": 10,
         "shipList": {
@@ -151,23 +157,9 @@ class Game:
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
         self.player_A.set_ships_on_board()
         self.player_B.set_ships_on_board()
-        self.print_game_state()
-
-        while True:
-            pos = (int(input("y: ")), int(input("x: ")))
-            if player_a_turn:
-                self.player_A.shoot_at(pos, self.player_B)
-            else:
-                self.player_B.shoot_at(pos, self.player_A)
-            self.print_game_state()
-            player_a_turn = not player_a_turn
 
     def print_game_state(self):
         print("PlayerA:")
         self.player_A.print_player_board()
         print("\nPlayerB:")
         self.player_B.print_player_board()
-
-
-game = Game()
-game.start_game()
