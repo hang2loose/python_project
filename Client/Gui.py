@@ -39,8 +39,6 @@ class GUI:
     def __init__(self, framework):
         self.gui = framework
         self.coords = {}
-        self.state = "game"
-        self.event_type = "shoot"
 
         self.water = [
             "dark.gif",
