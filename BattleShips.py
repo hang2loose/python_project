@@ -1,5 +1,3 @@
-import socketio
-
 from BattleShipsEnums import *
 
 
@@ -59,7 +57,6 @@ class Ship:
         return tmp
 
 
-
 class Board:
     def __init__(self, size: int):
         self.__size = size
@@ -75,7 +72,12 @@ class Board:
             print()
 
     def set_ship_on_board(self, ship: Ship, pos: tuple):
-        ship_fields = self.__get_ship_fields(ship, pos)
+        try:
+            ship_fields = self.__get_ship_fields(ship, pos)
+        except IndexError:
+            print("Wanted ship position not in Bounds!!!")
+            print("try again")
+            return False
         for field in ship_fields:
             if field.get_state() is not FIELD_STATE.EMPTY:
                 return False
@@ -83,8 +85,8 @@ class Board:
 
     def __get_ship_fields(self, ship: Ship, pos: tuple):
         if ship.get_orientation() == SHIP_ORIENTATION.HORIZONTAL:
-            return [self.__get_field((pos[0], h)) for h in range(ship.get_size())]
-        return [self.__get_field((v, pos[1])) for v in range(ship.get_size())]
+            return [self.__get_field((pos[0] + h, pos[1])) for h in range(ship.get_size())]
+        return [self.__get_field((pos[0], pos[1] + v)) for v in range(ship.get_size())]
 
     def __get_field(self, pos: tuple):
         return self.__board[pos[1]][pos[0]]
@@ -139,7 +141,7 @@ class Player:
     def set_ships_on_board(self):
         ship = self.__player_ships[0][0]
         ship.switch_orientation()
-        pos = (0, 0)
+        pos = (9, 9)
         if self.__player_board.set_ship_on_board(ship, pos) is True:
             return True
         return False
@@ -150,7 +152,7 @@ class Player:
             for ship in ship_list:
                 tmp.append(ship.to_event())
         return tmp
-        #return [ship.to_event() for ship in [ship_list for ship_list in self.__player_ships]]
+        # return [ship.to_event() for ship in [ship_list for ship_list in self.__player_ships]]
 
 
 class Game:
@@ -175,9 +177,13 @@ class Game:
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
         self.player_A.set_ships_on_board()
         self.player_B.set_ships_on_board()
+        self.print_game_state()
 
     def print_game_state(self):
         print("PlayerA:")
         self.player_A.print_player_board()
         print("\nPlayerB:")
         self.player_B.print_player_board()
+
+
+g = Game()
