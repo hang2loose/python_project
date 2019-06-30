@@ -56,6 +56,7 @@ class Ship:
             "size": self.get_size(),
             "pos": self.pos
         }
+        return tmp
 
 
 
