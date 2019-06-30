@@ -11,20 +11,28 @@ class EventHandler:
         function_dict = functions
         self.sio.connect('http://localhost:8080')
 
-    @sio.on('hit')
-    def on_hit(self):
-        function_dict['hit'].__call__(self)
-
-    @sio.on('miss')
-    def on_miss(self):
-        function_dict['miss'].__call__(self)
-
-    @sio.on('ship')
-    def set_ship(self):
-        function_dict['ship'].__call__(self.pos, self.orientation, self.size)
-
     def shoot_at(self, pos):
         self.sio.emit('shoot_at', pos)
+
+    @sio.on('hit')
+    def on_hit(payload):
+        function_dict['action'].__call__('hit', payload, "Target_Board")
+
+    @sio.on('miss')
+    def on_miss(payload):
+        function_dict['action'].__call__('miss', payload, "Target_Board")
+
+    @sio.on('ship_hit')
+    def ship_hit(payload):
+        function_dict['action'].__call__('hit', payload, "Ship_Board")
+
+    @sio.on('ship_miss')
+    def ship_miss(payload):
+        function_dict['action'].__call__('miss', payload, "Ship_Board")
+
+    @sio.on('ship')
+    def set_ship(payload):
+        function_dict['ship'].__call__(payload.pos, payload.orientation, payload.size)
 
 
 class GUI:
@@ -41,9 +49,7 @@ class GUI:
         ]
 
         self.functions = {
-            "set": self.shoot,
-            "hit": self.hit_target,
-            "miss": self.miss_target,
+            "action": self.action,
             "ship": self.set_ship
         }
 
@@ -52,17 +58,11 @@ class GUI:
     def shoot(self, pos):
         self.event.shoot_at(pos)
 
-    def hit_target(self, pos):
-        self.gui.addCanvasImage("Target_Board",
+    def action(self, event, pos, board):
+        self.gui.addCanvasImage(board,
                                 self.coords[pos][0] + 16,
                                 self.coords[pos][1] + 16,
-                                "hit.gif")
-
-    def miss_target(self, pos):
-        self.gui.addCanvasImage("Target_Board",
-                                self.coords[pos][0] + 16,
-                                self.coords[pos][1] + 16,
-                                "miss.gif")
+                                "{}.gif".format(event))
 
     def set_ship(self, pos, orientation, size):
         self.gui.addCanvasImage("Ship_Board",
@@ -97,62 +97,43 @@ class GUI:
         self.gui.setGuiPadding(100, 20)
         self.gui.setImageLocation("./Client/images")
 
-    def draw_board(self):
-        self.gui.startFrame("Ships", 1, 0)
-
-        self.gui.addCanvas("Ships_Board")
-        self.gui.setCanvasWidth("Ships_Board", 352)
-        self.gui.setCanvasHeight("Ships_Board", 352)
-
-        self.gui.addCanvasImage("Ships_Board", 192, 16, "top_bar.gif")
-        self.gui.addCanvasImage("Ships_Board", 16, 192, "left_bar.gif")
-
+    def canvas_board(self, board_name):
+        self.gui.addCanvas(board_name)
+        self.gui.setCanvasWidth(board_name, 352)
+        self.gui.setCanvasHeight(board_name, 352)
+        self.gui.addCanvasImage(board_name, 192, 16, "top_bar.gif")
+        self.gui.addCanvasImage(board_name, 16, 192, "left_bar.gif")
         x = 16
         for row in range(10):
             x += 32
             y = 16
             for column in range(10):
                 y += 32
-                self.gui.addCanvasImage("Ships_Board", x, y, random.choice(self.water))
-                self.coords.update({"{},{}".format(row, column): [x-16, y-16, x+16, y+16]})
+                self.gui.addCanvasImage(board_name, x, y, random.choice(self.water))
+                self.coords.update({"{},{}".format(row, column): [x - 16, y - 16, x + 16, y + 16]})
 
+    def draw_board(self):
+        self.gui.startFrame("Ships", 1, 0)
+        self.canvas_board("Ships_Board")
         self.gui.stopFrame()
 
         self.gui.startFrame("Target", 1, 1)
-
-        self.gui.addCanvas("Target_Board")
-        self.gui.setCanvasWidth("Target_Board", 352)
-        self.gui.setCanvasHeight("Target_Board", 352)
-
-        self.gui.addCanvasImage("Target_Board", 160, 16, "top_bar.gif")
-        self.gui.addCanvasImage("Target_Board", 336, 192, "right_bar.gif")
-
-        x = -16
-        for row in range(10):
-            x += 32
-            y = 16
-            for column in range(10):
-                y += 32
-                self.gui.addCanvasImage("Target_Board", x, y, random.choice(self.water))
-                self.coords.update({"{},{}".format(row, column): [x - 16, y - 16, x + 16, y + 16]})
-
+        self.canvas_board("Target_Board")
         self.gui.setCanvasMap("Target_Board", self.shoot, self.coords)
-
         self.gui.stopFrame()
+
+    def label_with_properties(self, name, title, align, row, column):
+        self.gui.addLabel(name, title, row, column)
+        self.gui.getLabelWidget(name).config(font=("Helvetica", "20", "bold"))
+        self.gui.setLabelAlign(name, align)
+        self.gui.setLabelSticky(name, "both")
 
     def draw(self):
         self.draw_parameters()
 
-        self.gui.startFrame("State", 0, 0, 2)
-        self.gui.addLabel("Ships", "STRATEGY MAP", 0, 0)
-        self.gui.addLabel("Target", "TARGET MAP", 0, 1)
-
-        self.gui.getLabelWidget("Ships").config(font=("Helvetica", "20", "bold"))
-        self.gui.setLabelAlign("Ships", "left")
-        self.gui.setLabelSticky("Ships", "both")
-        self.gui.getLabelWidget("Target").config(font=("Helvetica", "20", "bold"))
-        self.gui.setLabelAlign("Target", "right")
-        self.gui.setLabelSticky("Target", "both")
+        self.gui.startFrame("Map_Title", 0, 0, 2)
+        self.label_with_properties("Ships", "STRATEGY MAP", "left", 0, 0)
+        self.label_with_properties("Target", "TARGET MAP", "right", 0, 1)
         self.gui.stopFrame()
 
         self.draw_board()
