@@ -23,6 +23,7 @@ class Ship:
         self.__occupied_fields = []
         self.__size = ship_type.value
         self.__orientation = SHIP_ORIENTATION.HORIZONTAL
+        self.pos = ()
 
     def is_ship_alive(self):
         for field in self.__occupied_fields:
@@ -37,8 +38,9 @@ class Ship:
             self.__orientation = SHIP_ORIENTATION.HORIZONTAL
         return self.__orientation
 
-    def occupie_fields(self, ship_fields):
+    def occupie_fields(self, ship_fields, pos):
         self.__occupied_fields = ship_fields
+        self.pos = pos
         for field in self.__occupied_fields:
             field.change_field_state(FIELD_STATE.SHIP_ALIVE)
 
@@ -47,6 +49,14 @@ class Ship:
 
     def get_size(self):
         return self.__size
+
+    def to_event(self):
+        tmp = {
+            "orientation": self.get_orientation().value,
+            "size": self.get_size(),
+            "pos": self.pos
+        }
+
 
 
 class Board:
@@ -68,7 +78,7 @@ class Board:
         for field in ship_fields:
             if field.get_state() is not FIELD_STATE.EMPTY:
                 return False
-        ship.occupie_fields(ship_fields)
+        ship.occupie_fields(ship_fields, pos)
 
     def __get_ship_fields(self, ship: Ship, pos: tuple):
         if ship.get_orientation() == SHIP_ORIENTATION.HORIZONTAL:
@@ -102,7 +112,7 @@ class Player:
         print("---------------------")
         self.__enemy_board.print_board()
 
-    def recive_shot(self, pos: tuple):
+    def receive_shot(self, pos: tuple):
         if self.__player_board.get_field_state(pos) is FIELD_STATE.SHIP_ALIVE:
             self.__player_board.change_field_state(pos, FIELD_STATE.SHIP_HIT)
             return "hit"
@@ -110,7 +120,7 @@ class Player:
         return "miss"
 
     def shoot_at(self, pos: tuple, player):
-        event = player.recive_shot(pos)
+        event = player.receive_shot(pos)
         if event is "hit":
             self.__enemy_board.change_field_state(pos, FIELD_STATE.SHIP_HIT)
             return
@@ -131,6 +141,14 @@ class Player:
         if self.__player_board.set_ship_on_board(ship, pos) is True:
             return True
         return False
+
+    def get_ship_events(self):
+        tmp = []
+        for ship_list in self.__player_ships:
+            for ship in ship_list:
+                tmp.append(ship.to_event())
+        return tmp
+        #return [ship.to_event() for ship in [ship_list for ship_list in self.__player_ships]]
 
 
 class Game:
@@ -157,6 +175,8 @@ class Game:
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
         self.player_A.set_ships_on_board()
         self.player_B.set_ships_on_board()
+
+        self.player_A.shoot_at((1, 1), self.player_B)
 
     def print_game_state(self):
         print("PlayerA:")
