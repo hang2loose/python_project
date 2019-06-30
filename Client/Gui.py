@@ -1,51 +1,30 @@
 import random
-import socket
-import json
+import socketio
 from appJar import gui
 
 
-class ConnectionHandler:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+class EventHandler:
+    sio = socketio.Client()
 
-    def __init__(self, parser):
-        self.sock.connect(("127.0.0.1", 8080))
-        self.parser = parser
-
-    def receive(self):
-        while True:
-            data = self.sock.recv(1024)
-            if not data:
-                break
-            self.parser.receive_data(str(data, 'utf-8'))
-
-    def send(self, data):
-        self.sock.send(bytes(data, 'utf-8'))
-
-
-class Parser:
     def __init__(self, functions: dict):
-        self.functions = functions
-        self.connection_handler = ConnectionHandler(self)
+        global function_dict
+        function_dict = functions
+        self.sio.connect('http://192.168.0.59:8080')
 
-    def listener(self):
-        self.connection_handler.receive()
+    @sio.on('hit')
+    def on_hit(self):
+        function_dict['hit'].__call__(self)
 
-    def extract(self, event, load):
-        self.functions[event].__call__(load)
+    @sio.on('miss')
+    def on_miss(self):
+        function_dict['miss'].__call__(self)
 
-    def receive_data(self, data):
-        data = json.loads(data)
-        print(data)
-        self.extract(data["event_type"], str(data["pos"]))
+    @sio.on('ship')
+    def set_ship(self):
+        function_dict['ship'].__call__(self.pos, self.orientation, self.size)
 
-    def send_data(self, state, event_type, pos):
-        data = {
-            "state": state,
-            "event": event_type,
-            "pos": pos
-        }
-        self.connection_handler.send(json.dumps(data))
-
+    def shoot_at(self, pos):
+        self.sio.emit('shoot_at', pos)
 
 
 class GUI:
@@ -62,28 +41,50 @@ class GUI:
         ]
 
         self.functions = {
-            "board": self.board,
-            "set": self.set,
-            "hit": self.hit,
-            "miss": self.miss
+            "set": self.shoot,
+            "hit": self.hit_target,
+            "miss": self.miss_target,
+            "ship": self.set_ship
         }
 
-        self.parser = Parser(self.functions)
+        self.event = EventHandler(self.functions)
 
-        self.gui.thread(self.parser.listener)
+    def shoot(self, pos):
+        self.event.shoot_at(pos)
 
-    def set(self, pos):
-        if pos[:7] != "UNKNOWN":
-            self.parser.send_data(self.state, self.event_type, pos)
+    def hit_target(self, pos):
+        self.gui.addCanvasImage("Target_Board",
+                                self.coords[pos][0] + 16,
+                                self.coords[pos][1] + 16,
+                                "hit.gif")
 
-    def board(self):
-        return 10
+    def miss_target(self, pos):
+        self.gui.addCanvasImage("Target_Board",
+                                self.coords[pos][0] + 16,
+                                self.coords[pos][1] + 16,
+                                "miss.gif")
 
-    def hit(self, pos):
-        self.gui.addCanvasImage("Target_Board", self.coords[pos][0] + 16, self.coords[pos][2] + 16, "hit.gif")
-
-    def miss(self, pos):
-        self.gui.addCanvasImage("Target_Board", self.coords[pos][0] + 16, self.coords[pos][2] + 16, "miss.gif")
+    def set_ship(self, pos, orientation, size):
+        self.gui.addCanvasImage("Ship_Board",
+                                self.coords[pos][0] + 16,
+                                self.coords[pos][1] + 16,
+                                "ship.gif")
+        if orientation == 'h':
+            ship_coords = -16
+            for length in range(size):
+                ship_coords += 32
+                self.gui.addCanvasImage("Ship_Board",
+                                        self.coords[pos][0] + ship_coords,
+                                        self.coords[pos][1] + 16,
+                                        "ship.gif")
+        else:
+            ship_coords = -16
+            for length in range(size):
+                ship_coords += 32
+                self.gui.addCanvasImage("Ship_Board",
+                                        self.coords[pos][0] + 16,
+                                        self.coords[pos][1] + ship_coords,
+                                        "ship.gif")
 
     def draw_parameters(self):
         self.gui.setTitle("Battleships")
@@ -107,15 +108,13 @@ class GUI:
         self.gui.addCanvasImage("Ships_Board", 16, 192, "left_bar.gif")
 
         x = 16
-        for row in range(self.board()):
+        for row in range(10):
             x += 32
             y = 16
-            for column in range(self.board()):
+            for column in range(10):
                 y += 32
                 self.gui.addCanvasImage("Ships_Board", x, y, random.choice(self.water))
                 self.coords.update({"{},{}".format(row, column): [x-16, y-16, x+16, y+16]})
-
-        #self.gui.setCanvasMap("Set Board", self.set, self.coords)
 
         self.gui.stopFrame()
 
@@ -129,15 +128,15 @@ class GUI:
         self.gui.addCanvasImage("Target_Board", 336, 192, "right_bar.gif")
 
         x = -16
-        for row in range(self.board()):
+        for row in range(10):
             x += 32
             y = 16
-            for column in range(self.board()):
+            for column in range(10):
                 y += 32
                 self.gui.addCanvasImage("Target_Board", x, y, random.choice(self.water))
                 self.coords.update({"{},{}".format(row, column): [x - 16, y - 16, x + 16, y + 16]})
 
-        self.gui.setCanvasMap("Target_Board", self.set, self.coords)
+        self.gui.setCanvasMap("Target_Board", self.shoot, self.coords)
 
         self.gui.stopFrame()
 
