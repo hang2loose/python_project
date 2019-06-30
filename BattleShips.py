@@ -1,4 +1,5 @@
 from BattleShipsEnums import *
+import random
 
 
 class Field:
@@ -82,6 +83,7 @@ class Board:
             if field.get_state() is not FIELD_STATE.EMPTY:
                 return False
         ship.occupie_fields(ship_fields, pos)
+        return True
 
     def __get_ship_fields(self, ship: Ship, pos: tuple):
         if ship.get_orientation() == SHIP_ORIENTATION.HORIZONTAL:
@@ -140,19 +142,26 @@ class Player:
 
     def set_ships_on_board(self):
         ship = self.__player_ships[0][0]
-        ship.switch_orientation()
-        pos = (9, 9)
+        # ship.switch_orientation()
+        pos = (5, 5)
         if self.__player_board.set_ship_on_board(ship, pos) is True:
             return True
         return False
 
     def get_ship_events(self):
-        tmp = []
-        for ship_list in self.__player_ships:
-            for ship in ship_list:
-                tmp.append(ship.to_event())
+        return [ship.to_event() for sublist in self.__player_board for ship in sublist]
+
+    def set_ships_random(self):
+        print("setting ships....")
+        for ship in [ship for sublist in self.__player_ships for ship in sublist]:
+            tmp = self.__player_board.set_ship_on_board(ship, self.__generate_random_pos())
+            while not tmp:
+                tmp = self.__player_board.set_ship_on_board(ship, self.__generate_random_pos())
+
+    def __generate_random_pos(self):
+        tmp = (random.randint(0, 9), random.randint(0, 9))
+        print(tmp)
         return tmp
-        # return [ship.to_event() for ship in [ship_list for ship_list in self.__player_ships]]
 
 
 class Game:
@@ -175,8 +184,8 @@ class Game:
         player_a_turn = True
 
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
-        self.player_A.set_ships_on_board()
-        self.player_B.set_ships_on_board()
+        self.player_A.set_ships_random()
+        self.player_B.set_ships_random()
         self.print_game_state()
 
     def print_game_state(self):
