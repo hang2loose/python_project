@@ -181,12 +181,13 @@ class Game:
     def __init__(self):
         self.player_A = Player(self.gamerules)
         self.player_B = Player(self.gamerules)
+        self.player_A.set_ships_random()
+        self.player_B.set_ships_random()
         #self.start_game()
 
     def start_game(self):
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
-        self.player_A.set_ships_random()
-        self.player_B.set_ships_random()
+
         self.print_game_state()
 
     def print_game_state(self):
