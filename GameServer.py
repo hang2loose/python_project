@@ -13,11 +13,11 @@ battle_ships = Game()
 players = {
     battle_ships.player_A: {
         "enemy": battle_ships.player_B,
-        "sid": players_list[0]
+        "sid": None
     },
     battle_ships.player_B: {
         "enemy": battle_ships.player_A,
-        "sid": players_list[1]
+        "sid": None
     }
 }
 
@@ -42,9 +42,10 @@ def disconnect(sid):
 @sio.on('shoot_at')
 def handle_player_shot(sid, payload):
     print("pizza " + payload)
-    pos = tuple(int(p) for p in payload.split(','))
-    sio.emit(battle_ships.player_A.shoot_at(pos, battle_ships.player_B), payload, sid)
-    battle_ships.print_game_state()
+    shooting_player = get_player_from_sid(sid)
+    player_shoot_at_player(shooting_player, payload)
+
+    # battle_ships.print_game_state()
 
 
 def player_shoot_at_player(player, payload):
@@ -55,13 +56,19 @@ def player_shoot_at_player(player, payload):
     # convert payload to position tuple
     pos = tuple(int(p) for p in payload.split(','))
 
-    shoot_result = battle_ships.player.shoot_at(pos, player_enemy)
+    shoot_result = player.shoot_at(pos, player_enemy)
 
     # emit result to shooting player
     sio.emit(shoot_result, payload, player_sid)
 
     # emit result to enemy
-    sio.emit("ship_"+shoot_result, payload, enemy_sid)
+    sio.emit("ship_" + shoot_result, payload, enemy_sid)
+
+
+def get_player_from_sid(sid):
+    for player in players:
+        if players[player]["sid"] is sid:
+            return player
 
 
 if __name__ == '__main__':
