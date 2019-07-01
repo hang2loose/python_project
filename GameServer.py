@@ -47,5 +47,22 @@ def handle_player_shot(sid, payload):
     battle_ships.print_game_state()
 
 
+def player_shoot_at_player(player, payload):
+    player_enemy = players[player]["enemy"]
+    player_sid = players[player]["sid"]
+    enemy_sid = players[player_enemy]["sid"]
+
+    # convert payload to position tuple
+    pos = tuple(int(p) for p in payload.split(','))
+
+    shoot_result = battle_ships.player.shoot_at(pos, player_enemy)
+
+    # emit result to shooting player
+    sio.emit(shoot_result, payload, player_sid)
+
+    # emit result to enemy
+    sio.emit("ship_"+shoot_result, payload, enemy_sid)
+
+
 if __name__ == '__main__':
     eventlet.wsgi.server(eventlet.listen(('', 8080)), app)
