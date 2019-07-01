@@ -29,10 +29,12 @@ class EventHandler:
 
     @sio.on('ship_hit')
     def ship_hit(payload):
+        print("ship_hit")
         function_dict['action'].__call__('hit', payload, "Ship_Board")
 
     @sio.on('ship_miss')
     def ship_miss(payload):
+        print("ship_miss")
         function_dict['action'].__call__('miss', payload, "Ship_Board")
 
     @sio.on('ship')
@@ -99,7 +101,7 @@ class GUI:
 
         self.gui.setStretch("None")
         self.gui.setGuiPadding(100, 20)
-        self.gui.setImageLocation("./Client/images")
+        self.gui.setImageLocation("./images")
 
     def canvas_board(self, board_name):
         self.gui.addCanvas(board_name)
@@ -118,7 +120,7 @@ class GUI:
 
     def draw_board(self):
         self.gui.startFrame("Ships", 1, 0)
-        self.canvas_board("Ships_Board")
+        self.canvas_board("Ship_Board")
         self.gui.stopFrame()
 
         self.gui.startFrame("Target", 1, 1)

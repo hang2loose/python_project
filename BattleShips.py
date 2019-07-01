@@ -181,7 +181,7 @@ class Game:
     def __init__(self):
         self.player_A = Player(self.gamerules)
         self.player_B = Player(self.gamerules)
-        self.start_game()
+        #self.start_game()
 
     def start_game(self):
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
