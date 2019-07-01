@@ -53,6 +53,7 @@ def handle_player_shot(sid, payload):
 
 @sio.on('get_ships')
 def get_ships(sid):
+    print('getting ships..')
     for ship_event in get_player_from_sid(sid).get_ship_events():
         sio.emit("ship", ship_event, sid)
 
