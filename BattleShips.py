@@ -155,9 +155,9 @@ class Player:
         print("setting ships....hope you will be happy ;)")
         for ship in [ship for sublist in self.__player_ships for ship in sublist]:
             tmp = self.__player_board.set_ship_on_board(ship, self.__generate_random_pos())
+            if random.randint(0,100) % 2 is 1:
+                ship.switch_orientation()
             while not tmp:
-                if random.randint(0,100) % 2 is 1:
-                    ship.switch_orientation()
                 tmp = self.__player_board.set_ship_on_board(ship, self.__generate_random_pos())
 
     def __generate_random_pos(self):
