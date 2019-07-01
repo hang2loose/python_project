@@ -30,6 +30,9 @@ def connect(sid, environ):
         sio.emit('player', 'Waiting for Player...', sid)
     if len(players_list) is 2:
         players[battle_ships.player_B]["sid"] = sid
+
+        # starts game after 2 players are connected ( all other connections will be ignored )
+        battle_ships.start_game()
     print('connect ', sid)
 
 
