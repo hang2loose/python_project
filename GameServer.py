@@ -14,6 +14,8 @@ battle_ships = Game()
 @sio.event
 def connect(sid, environ):
     players_list.append(sid)
+    if len(players_list) < 2:
+        sio.emit('player', 'Waiting for Player...', sid)
     print('connect ', sid)
 
 

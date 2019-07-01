@@ -14,6 +14,11 @@ class EventHandler:
     def shoot_at(self, pos):
         self.sio.emit('shoot_at', pos)
 
+    @sio.on('player')
+    def player_state(payload):
+        function_dict['player'].__call__(payload)
+        print(payload)
+
     @sio.on('hit')
     def on_hit(payload):
         function_dict['action'].__call__('hit', payload, "Target_Board")
@@ -48,7 +53,8 @@ class GUI:
 
         self.functions = {
             "action": self.action,
-            "ship": self.set_ship
+            "ship": self.set_ship,
+            "player": self.player
         }
 
         self.event = EventHandler(self.functions)
@@ -93,7 +99,7 @@ class GUI:
 
         self.gui.setStretch("None")
         self.gui.setGuiPadding(100, 20)
-        self.gui.setImageLocation("./images")
+        self.gui.setImageLocation("./Client/images")
 
     def canvas_board(self, board_name):
         self.gui.addCanvas(board_name)
@@ -126,6 +132,10 @@ class GUI:
         self.gui.setLabelAlign(name, align)
         self.gui.setLabelSticky(name, "both")
 
+    def player(self, event):
+        print(event)
+        self.gui.setLabel("player", event)
+
     def draw(self):
         self.draw_parameters()
 
@@ -139,9 +149,10 @@ class GUI:
         self.gui.setFramePadding("Ships", [10, 10])
         self.gui.setFramePadding("Target", [10, 10])
 
-        self.gui.startLabelFrame("Logic", 2, 0, 2)
-        self.gui.addLabel("l2", "Label 2")
-        self.gui.stopLabelFrame()
+        self.gui.startFrame("State", 2, 0, 2)
+        self.gui.addLabel("title", "State")
+        self.gui.addLabel("player", "")
+        self.gui.stopFrame()
 
 
 app = gui()
