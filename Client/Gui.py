@@ -39,7 +39,8 @@ class EventHandler:
 
     @sio.on('ship')
     def set_ship(payload):
-        function_dict['ship'].__call__(payload.pos, payload.orientation, payload.size)
+        print("setting ship....")
+        function_dict['ship'].__call__(payload["pos"], payload["orientation"], payload["size"])
 
 
 class GUI:

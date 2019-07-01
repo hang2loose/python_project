@@ -53,7 +53,7 @@ class Ship:
         tmp = {
             "orientation": self.get_orientation().value,
             "size": self.get_size(),
-            "pos": self.pos
+            "pos": "{},{}".format(self.pos[0], self.pos[1])
         }
         return tmp
 
