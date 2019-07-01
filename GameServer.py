@@ -21,6 +21,8 @@ players = {
     }
 }
 
+active_player = battle_ships.player_A
+
 
 @sio.event
 def connect(sid, environ):
@@ -44,9 +46,11 @@ def disconnect(sid):
 
 @sio.on('shoot_at')
 def handle_player_shot(sid, payload):
+    global active_player
     print("pizza " + payload)
-    shooting_player = get_player_from_sid(sid)
-    player_shoot_at_player(shooting_player, payload)
+    if active_player is get_player_from_sid(sid):
+        shooting_player = get_player_from_sid(sid)
+        active_player = player_shoot_at_player(shooting_player, payload)
 
     # battle_ships.print_game_state()
 
@@ -73,6 +77,8 @@ def player_shoot_at_player(player, payload):
 
     # emit result to enemy
     sio.emit("ship_" + shoot_result, payload, enemy_sid)
+
+    return player_enemy
 
 
 def get_player_from_sid(sid):
