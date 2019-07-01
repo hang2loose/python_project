@@ -25,6 +25,7 @@ players = {
 @sio.event
 def connect(sid, environ):
     players_list.append(sid)
+    print('connect ', sid)
     if len(players_list) is 1:
         players[battle_ships.player_A]["sid"] = sid
         sio.emit('player', 'Waiting for Player...', sid)
@@ -33,7 +34,6 @@ def connect(sid, environ):
 
         # starts game after 2 players are connected ( all other connections will be ignored )
         battle_ships.start_game()
-    print('connect ', sid)
 
 
 @sio.event
