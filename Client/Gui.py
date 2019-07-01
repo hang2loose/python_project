@@ -11,6 +11,9 @@ class EventHandler:
         function_dict = functions
         self.sio.connect('http://localhost:8080')
 
+    def get_ships(self):
+        self.sio.emit('get_ships')
+
     def shoot_at(self, pos):
         self.sio.emit('shoot_at', pos)
 
@@ -41,6 +44,7 @@ class EventHandler:
     def set_ship(payload):
         print("setting ship....")
         function_dict['ship'].__call__(payload["pos"], payload["orientation"], payload["size"])
+
 
 
 class GUI:
@@ -102,7 +106,7 @@ class GUI:
 
         self.gui.setStretch("None")
         self.gui.setGuiPadding(100, 20)
-        self.gui.setImageLocation("./images")
+        self.gui.setImageLocation("./Client/images")
 
     def canvas_board(self, board_name):
         self.gui.addCanvas(board_name)
@@ -156,6 +160,8 @@ class GUI:
         self.gui.addLabel("title", "State")
         self.gui.addLabel("player", "")
         self.gui.stopFrame()
+
+        self.event.get_ships()
 
 
 app = gui()
