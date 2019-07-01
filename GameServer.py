@@ -25,8 +25,11 @@ players = {
 @sio.event
 def connect(sid, environ):
     players_list.append(sid)
-    if len(players_list) < 2:
+    if len(players_list) is 1:
+        players[battle_ships.player_A]["sid"] = sid
         sio.emit('player', 'Waiting for Player...', sid)
+    if len(players_list) is 2:
+        players[battle_ships.player_B]["sid"] = sid
     print('connect ', sid)
 
 
