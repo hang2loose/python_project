@@ -10,6 +10,17 @@ app = socketio.WSGIApp(sio, static_files={
 players_list = []
 battle_ships = Game()
 
+players = {
+    battle_ships.player_A: {
+        "enemy": battle_ships.player_B,
+        "sid": players_list[0]
+    },
+    battle_ships.player_B: {
+        "enemy": battle_ships.player_A,
+        "sid": players_list[1]
+    }
+}
+
 
 @sio.event
 def connect(sid, environ):

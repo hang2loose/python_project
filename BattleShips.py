@@ -154,15 +154,17 @@ class Player:
     def set_ships_random(self):
         print("setting ships....hope you will be happy ;)")
         for ship in [ship for sublist in self.__player_ships for ship in sublist]:
-            tmp = self.__player_board.set_ship_on_board(ship, self.__generate_random_pos())
-            if random.randint(0,100) % 2 is 1:
-                ship.switch_orientation()
-            while not tmp:
-                tmp = self.__player_board.set_ship_on_board(ship, self.__generate_random_pos())
+            self.__randomly_switch_ship_orientation(ship)
+            while not self.__player_board.set_ship_on_board(ship, self.__generate_random_pos()):
+                self.__randomly_switch_ship_orientation(ship)
 
     def __generate_random_pos(self):
         tmp = (random.randint(0, 9), random.randint(0, 9))
         return tmp
+
+    def __randomly_switch_ship_orientation(self, ship: Ship):
+        if random.randint(0, 100) % 2 is 1:
+            ship.switch_orientation()
 
 
 class Game:
@@ -182,7 +184,6 @@ class Game:
         self.start_game()
 
     def start_game(self):
-
         # die könnten wa in 2 threads werfen später damit die spieler gleichzeitig ihre schiffe setzten können
         self.player_A.set_ships_random()
         self.player_B.set_ships_random()
