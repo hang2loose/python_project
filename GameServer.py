@@ -39,6 +39,10 @@ def connect(sid, environ):
 
 @sio.event
 def disconnect(sid):
+    if players[battle_ships.player_A]["sid"] == sid:
+        sio.emit('game_over', 'win', players[battle_ships.player_B]["sid"])
+    if players[battle_ships.player_B]["sid"] == sid:
+        sio.emit('game_over', 'win', players[battle_ships.player_A]["sid"])
     players_list.remove(sid)
     print('disconnect ', sid)
 

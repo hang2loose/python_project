@@ -17,6 +17,11 @@ class EventHandler:
     def shoot_at(self, pos):
         self.sio.emit('shoot_at', pos)
 
+    @sio.on('game_over')
+    def game_over(payload):
+        function_dict['game_over'].__call__(payload)
+        print(payload)
+
     @sio.on('player')
     def player_state(payload):
         function_dict['player'].__call__(payload)
@@ -66,7 +71,8 @@ class GUI:
             "action": self.action,
             "ship": self.set_ship,
             "player": self.player,
-            "turn": self.turn
+            "turn": self.turn,
+            "game_over": self.game_over
         }
 
         self.event = EventHandler(self.functions)
@@ -167,6 +173,14 @@ class GUI:
         if event == 'wait':
             self.gui.hideLabel("Turn")
             self.gui.showLabel("Wait")
+
+    def game_over(self, event):
+        if event == 'win':
+            self.gui.addLabel("Win", "You Have Won", 0, 0, 2, 4)
+            self.gui.getLabelWidget("Win").config(font=("Helvetica", "20", "bold"))
+        if event == 'loose':
+            self.gui.addLabel("Loose", "You Lost", 0, 0, 2, 3)
+            self.gui.getLabelWidget("Loose").config(font=("Helvetica", "20", "bold"))
 
     def draw(self):
         self.draw_parameters()
