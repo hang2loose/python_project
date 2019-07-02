@@ -30,11 +30,12 @@ def connect(sid, environ):
     print('connect ', sid)
     if len(players_list) is 1:
         players[battle_ships.player_A]["sid"] = sid
-        sio.emit('player', 'Waiting for Player...', sid)
+        sio.emit('player', 'wait', sid)
     if len(players_list) is 2:
         players[battle_ships.player_B]["sid"] = sid
 
         # starts game after 2 players are connected ( all other connections will be ignored )
+        sio.emit('player', 'start', players[battle_ships.player_A]["sid"])
         start_game()
 
 
@@ -51,11 +52,12 @@ def handle_player_shot(sid, payload):
     if active_player is get_player_from_sid(sid):
         shooting_player = get_player_from_sid(sid)
         active_player = player_shoot_at_player(shooting_player, payload)
+        sio.emit('turn', 'turn', players[active_player]["sid"])
 
     # battle_ships.print_game_state()
 
 
-@sio.on('get_ships')
+@sio.on('gui_loaded')
 def get_ships(sid):
     print('getting ships..')
     for ship_event in get_player_from_sid(sid).get_ship_events():

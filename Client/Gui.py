@@ -11,8 +11,8 @@ class EventHandler:
         function_dict = functions
         self.sio.connect('http://localhost:8080')
 
-    def get_ships(self):
-        self.sio.emit('get_ships')
+    def gui_loaded(self):
+        self.sio.emit('gui_loaded')
 
     def shoot_at(self, pos):
         self.sio.emit('shoot_at', pos)
@@ -20,6 +20,11 @@ class EventHandler:
     @sio.on('player')
     def player_state(payload):
         function_dict['player'].__call__(payload)
+        print(payload)
+
+    @sio.on('turn')
+    def player_state(payload):
+        function_dict['turn'].__call__(payload)
         print(payload)
 
     @sio.on('hit')
@@ -61,13 +66,15 @@ class GUI:
         self.functions = {
             "action": self.action,
             "ship": self.set_ship,
-            "player": self.player
+            "player": self.player,
+            "turn": self.turn
         }
 
         self.event = EventHandler(self.functions)
 
     def shoot(self, pos):
         self.event.shoot_at(pos)
+        self.turn('wait')
 
     def action(self, event, pos, board):
         self.gui.addCanvasImage(board,
@@ -140,8 +147,21 @@ class GUI:
         self.gui.setLabelSticky(name, "both")
 
     def player(self, event):
-        print(event)
-        self.gui.setLabel("player", event)
+        if event is 'wait':
+            self.gui.setLabel("Player", "Waiting for Player")
+        elif event is 'start':
+            self.gui.setLabel("Player", "Shoot the Enemy Ships!")
+            # self.gui.showLabel("Turn")
+
+    def turn(self, event):
+        if event is 'turn':
+            self.gui.setLabel("Player", "Shoot the Enemy Ships!")
+            # self.gui.hideLabel("Wait")
+            # self.gui.showLabel("Turn")
+        elif event is 'wait':
+            self.gui.setLabel("Player", "Waiting")
+            # self.gui.hideLabel("Turn")
+            # self.gui.showLabel("Wait")
 
     def draw(self):
         self.draw_parameters()
@@ -156,12 +176,27 @@ class GUI:
         self.gui.setFramePadding("Ships", [10, 10])
         self.gui.setFramePadding("Target", [10, 10])
 
-        self.gui.startFrame("State", 2, 0, 2)
-        self.gui.addLabel("title", "State")
-        self.gui.addLabel("player", "")
-        self.gui.stopFrame()
+        self.gui.addLabel("Player", "Waiting for Player", 3, 0, 2)
+        self.gui.getLabelWidget("Player").config(font=("Helvetica", "16"))
+        self.gui.setLabelHeight("Player", 5)
+        self.gui.setLabelStretch("Player", "both")
+        self.gui.setLabelSticky("Player", "nesw")
 
-        self.event.get_ships()
+        # self.gui.addLabel("Turn", "Shoot the Enemy Ships!", 3, 0, 2)
+        # self.gui.getLabelWidget("Turn").config(font=("Helvetica", "14"))
+        # self.gui.setLabelHeight("Turn", 5)
+        # self.gui.setLabelStretch("Turn", "both")
+        # self.gui.setLabelSticky("Turn", "nesw")
+        # self.gui.hideLabel("Turn")
+
+        # self.gui.addLabel("Wait", "Waiting", 3, 0, 2)
+        # self.gui.getLabelWidget("Wait").config(font=("Helvetica", "14"))
+        # self.gui.setLabelHeight("Wait", 5)
+        # self.gui.setLabelStretch("Wait", "both")
+        # self.gui.setLabelSticky("Wait", "nesw")
+        # self.gui.hideLabel("Wait")
+
+        self.event.gui_loaded()
 
 
 app = gui()
