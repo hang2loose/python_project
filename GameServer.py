@@ -54,7 +54,7 @@ def handle_player_shot(sid, payload):
 
 
 @sio.on('gui_loaded')
-def get_ships(sid):
+def gui_loaded(sid):
     if len(players_list) is 1:
         sio.emit('player', 'wait', sid)
     if len(players_list) is 2:

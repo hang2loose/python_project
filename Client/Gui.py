@@ -20,12 +20,12 @@ class EventHandler:
     @sio.on('player')
     def player_state(payload):
         function_dict['player'].__call__(payload)
-        print(payload)
+        print('Player: ' + payload)
 
     @sio.on('turn')
     def player_state(payload):
         function_dict['turn'].__call__(payload)
-        print(payload)
+        print('Turn: ' + payload)
 
     @sio.on('hit')
     def on_hit(payload):
@@ -73,7 +73,7 @@ class GUI:
 
     def shoot(self, pos):
         self.event.shoot_at(pos)
-        self.turn('turn')
+        self.turn('wait')
 
     def action(self, event, pos, board):
         self.gui.addCanvasImage(board,
@@ -146,17 +146,17 @@ class GUI:
         self.gui.setLabelSticky(name, "both")
 
     def player(self, event):
-        if event is 'wait':
+        if event == 'wait':
             self.gui.showLabel("Player")
-        if event is 'start':
+        if event == 'start':
             self.gui.showLabel("Player")
             self.gui.showLabel("Turn")
 
     def turn(self, event):
-        if event is 'turn':
+        if event == 'turn':
             self.gui.hideLabel("Wait")
             self.gui.showLabel("Turn")
-        if event is 'wait':
+        if event == 'wait':
             self.gui.hideLabel("Turn")
             self.gui.showLabel("Wait")
 
