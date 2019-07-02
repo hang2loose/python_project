@@ -92,7 +92,6 @@ def get_player_from_sid(sid):
 
 
 def start_game():
-    battle_ships.start_game()
     global active_player
     active_player = battle_ships.player_A
 
