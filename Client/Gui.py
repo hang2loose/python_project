@@ -51,7 +51,6 @@ class EventHandler:
         function_dict['ship'].__call__(payload["pos"], payload["orientation"], payload["size"])
 
 
-
 class GUI:
     def __init__(self, framework):
         self.gui = framework
@@ -74,7 +73,7 @@ class GUI:
 
     def shoot(self, pos):
         self.event.shoot_at(pos)
-        self.turn('wait')
+        self.turn('turn')
 
     def action(self, event, pos, board):
         self.gui.addCanvasImage(board,
@@ -148,20 +147,18 @@ class GUI:
 
     def player(self, event):
         if event is 'wait':
-            self.gui.setLabel("Player", "Waiting for Player")
-        elif event is 'start':
-            self.gui.setLabel("Player", "Shoot the Enemy Ships!")
-            # self.gui.showLabel("Turn")
+            self.gui.showLabel("Player")
+        if event is 'start':
+            self.gui.showLabel("Player")
+            self.gui.showLabel("Turn")
 
     def turn(self, event):
         if event is 'turn':
-            self.gui.setLabel("Player", "Shoot the Enemy Ships!")
-            # self.gui.hideLabel("Wait")
-            # self.gui.showLabel("Turn")
-        elif event is 'wait':
-            self.gui.setLabel("Player", "Waiting")
-            # self.gui.hideLabel("Turn")
-            # self.gui.showLabel("Wait")
+            self.gui.hideLabel("Wait")
+            self.gui.showLabel("Turn")
+        if event is 'wait':
+            self.gui.hideLabel("Turn")
+            self.gui.showLabel("Wait")
 
     def draw(self):
         self.draw_parameters()
@@ -181,20 +178,21 @@ class GUI:
         self.gui.setLabelHeight("Player", 5)
         self.gui.setLabelStretch("Player", "both")
         self.gui.setLabelSticky("Player", "nesw")
+        self.gui.hideLabel("Player")
 
-        # self.gui.addLabel("Turn", "Shoot the Enemy Ships!", 3, 0, 2)
-        # self.gui.getLabelWidget("Turn").config(font=("Helvetica", "14"))
-        # self.gui.setLabelHeight("Turn", 5)
-        # self.gui.setLabelStretch("Turn", "both")
-        # self.gui.setLabelSticky("Turn", "nesw")
-        # self.gui.hideLabel("Turn")
+        self.gui.addLabel("Turn", "Shoot the Enemy Ships!", 3, 0, 2)
+        self.gui.getLabelWidget("Turn").config(font=("Helvetica", "14"))
+        self.gui.setLabelHeight("Turn", 5)
+        self.gui.setLabelStretch("Turn", "both")
+        self.gui.setLabelSticky("Turn", "nesw")
+        self.gui.hideLabel("Turn")
 
-        # self.gui.addLabel("Wait", "Waiting", 3, 0, 2)
-        # self.gui.getLabelWidget("Wait").config(font=("Helvetica", "14"))
-        # self.gui.setLabelHeight("Wait", 5)
-        # self.gui.setLabelStretch("Wait", "both")
-        # self.gui.setLabelSticky("Wait", "nesw")
-        # self.gui.hideLabel("Wait")
+        self.gui.addLabel("Wait", "Waiting", 3, 0, 2)
+        self.gui.getLabelWidget("Wait").config(font=("Helvetica", "14"))
+        self.gui.setLabelHeight("Wait", 5)
+        self.gui.setLabelStretch("Wait", "both")
+        self.gui.setLabelSticky("Wait", "nesw")
+        self.gui.hideLabel("Wait")
 
         self.event.gui_loaded()
 
