@@ -44,28 +44,30 @@ def connect(sid, environ):
     print('connect ', sid)
 
     if len(players_list) % 2 == 1:
-        sio.enter_room(sid, 'game_room_{}'.format(game_id))
         game_name = 'game_room_{}'.format(game_id)
-        game_dict.update({'game_room_{}'.format(game_id): Game()})
+        sio.enter_room(sid, game_name)
+        game_dict.update({game_name: Game()})
         players_dict.update(
-            {'game_room_{}'.format(game_id): {
-                game_dict['game_room_{}'.format(game_id)].player_A: {
-                    "enemy": game_dict['game_room_{}'.format(game_id)].player_B,
+            {game_name: {
+                game_dict[game_name].player_A: {
+                    "enemy": game_dict[game_name].player_B,
                     "sid": sid
                 }
             }}
         )
+
     if len(players_list) % 2 == 0:
-        sio.enter_room(sid, 'game_room_{}'.format(game_id))
-        players_dict['game_room_{}'.format(game_id)].update({
-                game_dict['game_room_{}'.format(game_id)].player_B: {
-                    "enemy": game_dict['game_room_{}'.format(game_id)].player_A,
+        sio.enter_room(sid, game_name)
+        players_dict[game_name].update({
+                game_dict[game_name].player_B: {
+                    "enemy": game_dict[game_name].player_A,
                     "sid": sid
                 }
             }
         )
-        print(players_dict)
         game_id_generator().__next__()
+
+    sio.emit('game_room', game_name, sid)
 
     if len(players_list) is 1:
         players[battle_ships.player_A]["sid"] = sid
