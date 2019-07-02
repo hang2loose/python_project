@@ -26,7 +26,7 @@ class Ship:
 
     def is_ship_alive(self):
         for field in self.__occupied_fields:
-            if field.state is FIELD_STATE.SHIP_ALIVE:
+            if field.get_state() is FIELD_STATE.SHIP_ALIVE:
                 return True
         return False
 
