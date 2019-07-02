@@ -9,6 +9,7 @@ app = socketio.WSGIApp(sio, static_files={
 
 players_list = []
 game_dict = {}
+players_dict = {}
 game_name = None
 game_id = 0
 
@@ -40,16 +41,30 @@ active_player = None
 def connect(sid, environ):
     global game_name
     players_list.append(sid)
-    print(len(players_list) % 2)
     print('connect ', sid)
 
     if len(players_list) % 2 == 1:
         sio.enter_room(sid, 'game_room_{}'.format(game_id))
         game_name = 'game_room_{}'.format(game_id)
         game_dict.update({'game_room_{}'.format(game_id): Game()})
-        print(game_dict)
+        players_dict.update(
+            {'game_room_{}'.format(game_id): {
+                game_dict['game_room_{}'.format(game_id)].player_A: {
+                    "enemy": game_dict['game_room_{}'.format(game_id)].player_B,
+                    "sid": sid
+                }
+            }}
+        )
     if len(players_list) % 2 == 0:
         sio.enter_room(sid, 'game_room_{}'.format(game_id))
+        players_dict['game_room_{}'.format(game_id)].update({
+                game_dict['game_room_{}'.format(game_id)].player_B: {
+                    "enemy": game_dict['game_room_{}'.format(game_id)].player_A,
+                    "sid": sid
+                }
+            }
+        )
+        print(players_dict)
         game_id_generator().__next__()
 
     if len(players_list) is 1:
