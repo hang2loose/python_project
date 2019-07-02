@@ -139,11 +139,19 @@ class GUI:
         self.gui.setCanvasMap("Target_Board", self.shoot, self.coords)
         self.gui.stopFrame()
 
-    def label_with_properties(self, name, title, align, row, column):
+    def title_label(self, name, title, align, row, column):
         self.gui.addLabel(name, title, row, column)
         self.gui.getLabelWidget(name).config(font=("Helvetica", "20", "bold"))
         self.gui.setLabelAlign(name, align)
         self.gui.setLabelSticky(name, "both")
+
+    def state_label(self, name, label):
+        self.gui.addLabel(name, label, 3, 0, 2)
+        self.gui.getLabelWidget(name).config(font=("Helvetica", "16"))
+        self.gui.setLabelHeight(name, 5)
+        self.gui.setLabelStretch(name, "both")
+        self.gui.setLabelSticky(name, "nesw")
+        self.gui.hideLabel(name)
 
     def player(self, event):
         if event == 'wait':
@@ -164,8 +172,8 @@ class GUI:
         self.draw_parameters()
 
         self.gui.startFrame("Map_Title", 0, 0, 2)
-        self.label_with_properties("Ships", "STRATEGY MAP", "left", 0, 0)
-        self.label_with_properties("Target", "TARGET MAP", "right", 0, 1)
+        self.title_label("Ships", "STRATEGY MAP", "left", 0, 0)
+        self.title_label("Target", "TARGET MAP", "right", 0, 1)
         self.gui.stopFrame()
 
         self.draw_board()
@@ -173,26 +181,9 @@ class GUI:
         self.gui.setFramePadding("Ships", [10, 10])
         self.gui.setFramePadding("Target", [10, 10])
 
-        self.gui.addLabel("Player", "Waiting for Player", 3, 0, 2)
-        self.gui.getLabelWidget("Player").config(font=("Helvetica", "16"))
-        self.gui.setLabelHeight("Player", 5)
-        self.gui.setLabelStretch("Player", "both")
-        self.gui.setLabelSticky("Player", "nesw")
-        self.gui.hideLabel("Player")
-
-        self.gui.addLabel("Turn", "Shoot the Enemy Ships!", 3, 0, 2)
-        self.gui.getLabelWidget("Turn").config(font=("Helvetica", "14"))
-        self.gui.setLabelHeight("Turn", 5)
-        self.gui.setLabelStretch("Turn", "both")
-        self.gui.setLabelSticky("Turn", "nesw")
-        self.gui.hideLabel("Turn")
-
-        self.gui.addLabel("Wait", "Waiting", 3, 0, 2)
-        self.gui.getLabelWidget("Wait").config(font=("Helvetica", "14"))
-        self.gui.setLabelHeight("Wait", 5)
-        self.gui.setLabelStretch("Wait", "both")
-        self.gui.setLabelSticky("Wait", "nesw")
-        self.gui.hideLabel("Wait")
+        self.state_label("Player", "Waiting for Player")
+        self.state_label("Turn", "Shoot the Enemy Ships!")
+        self.state_label("Wait", "Waiting for Turn")
 
         self.event.gui_loaded()
 
