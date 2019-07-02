@@ -55,6 +55,7 @@ def handle_player_shot(sid, payload):
         shooting_player = get_player_from_sid(sid)
         active_player = player_shoot_at_player(shooting_player, payload)
         sio.emit('turn', 'turn', players[active_player]["sid"])
+        game_over()
 
 
 @sio.on('gui_loaded')
@@ -98,6 +99,15 @@ def get_player_from_sid(sid):
 def start_game():
     global active_player
     active_player = battle_ships.player_A
+
+
+def game_over():
+    if not battle_ships.player_A.player_alive():
+        sio.emit('game_over', 'loose', players[battle_ships.player_A]["sid"])
+        sio.emit('game_over', 'win', players[battle_ships.player_B]["sid"])
+    if not battle_ships.player_B.player_alive():
+        sio.emit('game_over', 'win', players[battle_ships.player_A]["sid"])
+        sio.emit('game_over', 'loose', players[battle_ships.player_B]["sid"])
 
 
 if __name__ == '__main__':
