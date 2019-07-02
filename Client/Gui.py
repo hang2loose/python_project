@@ -15,19 +15,27 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
+function_dict = {}
+game_room = None
+
+
 class EventHandler:
     sio = socketio.Client()
 
     def __init__(self, functions: dict):
-        global function_dict
-        function_dict = functions
+        function_dict.update(functions)
         self.sio.connect('http://localhost:8080')
 
     def gui_loaded(self):
-        self.sio.emit('gui_loaded')
+        self.sio.emit('gui_loaded', game_room)
 
     def shoot_at(self, pos):
-        self.sio.emit('shoot_at', pos)
+        self.sio.emit('shoot_at', {'pos': pos, 'game_room': game_room})
+
+    @sio.on('game_room')
+    def game_room(payload):
+        global game_room
+        game_room = payload
 
     @sio.on('game_over')
     def game_over(payload):

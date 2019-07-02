@@ -91,10 +91,10 @@ def disconnect(sid):
 @sio.on('shoot_at')
 def handle_player_shot(sid, payload):
     global active_player
-    print("pizza " + payload)
+    print(payload)
     if active_player is get_player_from_sid(sid):
         shooting_player = get_player_from_sid(sid)
-        active_player = player_shoot_at_player(shooting_player, payload)
+        active_player = player_shoot_at_player(shooting_player, payload["pos"])
         if active_player.player_alive():
             sio.emit('turn', 'turn', players[active_player]["sid"])
         else:
@@ -102,7 +102,8 @@ def handle_player_shot(sid, payload):
 
 
 @sio.on('gui_loaded')
-def gui_loaded(sid):
+def gui_loaded(sid, payload):
+    print(payload)
     if len(players_list) is 1:
         sio.emit('player', 'wait', sid)
     if len(players_list) is 2:
