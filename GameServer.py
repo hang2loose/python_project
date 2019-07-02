@@ -21,7 +21,7 @@ players = {
     }
 }
 
-active_player = battle_ships.player_A
+active_player = None
 
 
 @sio.event
@@ -51,8 +51,6 @@ def handle_player_shot(sid, payload):
     if active_player is get_player_from_sid(sid):
         shooting_player = get_player_from_sid(sid)
         active_player = player_shoot_at_player(shooting_player, payload)
-
-    # battle_ships.print_game_state()
 
 
 @sio.on('get_ships')
@@ -89,6 +87,8 @@ def get_player_from_sid(sid):
 
 def start_game():
     battle_ships.start_game()
+    global active_player
+    active_player = battle_ships.player_A
 
 
 if __name__ == '__main__':
