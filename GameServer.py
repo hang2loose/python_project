@@ -21,22 +21,6 @@ def game_id_generator():
         yield
 
 
-battle_ships = Game()
-
-players = {
-    battle_ships.player_A: {
-        "enemy": battle_ships.player_B,
-        "sid": None
-    },
-    battle_ships.player_B: {
-        "enemy": battle_ships.player_A,
-        "sid": None
-    }
-}
-
-active_player = None
-
-
 @sio.event
 def connect(sid, environ):
     global game_name
@@ -65,93 +49,89 @@ def connect(sid, environ):
                 }
             }
         )
+        # starts game after 2 players are connected to the same game room
+        start_game(game_name)
         game_id_generator().__next__()
 
     sio.emit('game_room', game_name, sid)
 
-    if len(players_list) is 1:
-        players[battle_ships.player_A]["sid"] = sid
-    if len(players_list) is 2:
-        players[battle_ships.player_B]["sid"] = sid
-
-        # starts game after 2 players are connected ( all other connections will be ignored )
-        start_game()
-
 
 @sio.event
 def disconnect(sid):
-    if players[battle_ships.player_A]["sid"] == sid:
-        sio.emit('game_over', 'win', players[battle_ships.player_B]["sid"])
-    if players[battle_ships.player_B]["sid"] == sid:
-        sio.emit('game_over', 'win', players[battle_ships.player_A]["sid"])
-    players_list.remove(sid)
+    game_room = next((room for room, entry in players_dict.items() for key, value in entry.items() if value["sid"] == sid), None)
+
+    if players_dict[game_room][game_dict[game_room].player_A]["sid"] == sid:
+        sio.emit('game_over', 'win', players_dict[game_room][game_dict[game_room].player_B]["sid"])
+    if players_dict[game_room][game_dict[game_room].player_B]["sid"] == sid:
+        sio.emit('game_over', 'win', players_dict[game_room][game_dict[game_room].player_A]["sid"])
+
+    # TODO: Listen Aufräumen
+    # players_list.remove(sid)
     print('disconnect ', sid)
 
 
 @sio.on('shoot_at')
 def handle_player_shot(sid, payload):
-    global active_player
     print(payload)
-    if active_player is get_player_from_sid(sid):
-        shooting_player = get_player_from_sid(sid)
-        active_player = player_shoot_at_player(shooting_player, payload["pos"])
-        if active_player.player_alive():
-            sio.emit('turn', 'turn', players[active_player]["sid"])
+    if players_dict[payload["game_room"]]["active"] is get_player_from_sid(sid, payload["game_room"]):
+        shooting_player = get_player_from_sid(sid, payload["game_room"])
+        players_dict[payload["game_room"]].update({"active": player_shoot_at_player(shooting_player, payload)})
+        if players_dict[payload["game_room"]]["active"].player_alive():
+            sio.emit('turn', 'turn', players_dict[payload["game_room"]][players_dict[payload["game_room"]]["active"]]["sid"])
         else:
-            game_over()
+            game_over(payload["game_room"])
 
 
 @sio.on('gui_loaded')
 def gui_loaded(sid, payload):
     print(payload)
-    if len(players_list) is 1:
+    if len(players_dict[payload]) is 1:
         sio.emit('player', 'wait', sid)
-    if len(players_list) is 2:
-        sio.emit('player', 'start', players[battle_ships.player_A]["sid"])
-        sio.emit('turn', 'wait', players[battle_ships.player_B]["sid"])
+    if len(players_dict[payload]) is 3:
+        sio.emit('player', 'start', players_dict[payload][game_dict[payload].player_A]["sid"])
+        sio.emit('turn', 'wait', players_dict[payload][game_dict[payload].player_B]["sid"])
 
     print('sending ships..')
-    for ship_event in get_player_from_sid(sid).get_ship_events():
+    for ship_event in get_player_from_sid(sid, payload).get_ship_events():
         sio.emit("ship", ship_event, sid)
 
 
 def player_shoot_at_player(player, payload):
-    player_enemy = players[player]["enemy"]
-    player_sid = players[player]["sid"]
-    enemy_sid = players[player_enemy]["sid"]
+    player_enemy = players_dict[payload["game_room"]][player]["enemy"]
+    player_sid = players_dict[payload["game_room"]][player]["sid"]
+    enemy_sid = players_dict[payload["game_room"]][player_enemy]["sid"]
 
     # convert payload to position tuple
-    pos = tuple(int(p) for p in payload.split(','))
+    pos = tuple(int(p) for p in payload["pos"].split(','))
 
     shoot_result = player.shoot_at(pos, player_enemy)
 
     # emit result to shooting player
-    sio.emit(shoot_result, payload, player_sid)
+    sio.emit(shoot_result, payload["pos"], player_sid)
 
     # emit result to enemy
-    sio.emit("ship_" + shoot_result, payload, enemy_sid)
+    sio.emit("ship_" + shoot_result, payload["pos"], enemy_sid)
 
     return player_enemy
 
 
-def get_player_from_sid(sid):
-    for player in players:
-        if players[player]["sid"] is sid:
+def get_player_from_sid(sid, room):
+    for player in players_dict[room]:
+        if players_dict[room][player]["sid"] is sid:
             return player
 
 
-def start_game():
-    global active_player
-    active_player = battle_ships.player_A
+def start_game(room):
+    players_dict[room].update({"active": game_dict[room].player_A})
 
 
-def game_over():
-    if not battle_ships.player_A.player_alive():
-        sio.emit('game_over', 'loose', players[battle_ships.player_A]["sid"])
-        sio.emit('game_over', 'win', players[battle_ships.player_B]["sid"])
-    if not battle_ships.player_B.player_alive():
-        sio.emit('game_over', 'win', players[battle_ships.player_A]["sid"])
-        sio.emit('game_over', 'loose', players[battle_ships.player_B]["sid"])
+def game_over(room):
+    if not game_dict[room].player_A.player_alive():
+        sio.emit('game_over', 'loose', players_dict[room][game_dict[room].player_A]["sid"])
+        sio.emit('game_over', 'win', players_dict[room][game_dict[room].player_B]["sid"])
+    if not game_dict[room].player_B.player_alive():
+        sio.emit('game_over', 'win', players_dict[room][game_dict[room].player_A]["sid"])
+        sio.emit('game_over', 'loose', players_dict[room][game_dict[room].player_B]["sid"])
 
 
 if __name__ == '__main__':
