@@ -54,8 +54,10 @@ def handle_player_shot(sid, payload):
     if active_player is get_player_from_sid(sid):
         shooting_player = get_player_from_sid(sid)
         active_player = player_shoot_at_player(shooting_player, payload)
-        sio.emit('turn', 'turn', players[active_player]["sid"])
-        game_over()
+        if active_player.player_alive():
+            sio.emit('turn', 'turn', players[active_player]["sid"])
+        else:
+            game_over()
 
 
 @sio.on('gui_loaded')

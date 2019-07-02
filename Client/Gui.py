@@ -179,7 +179,7 @@ class GUI:
             self.gui.addLabel("Win", "You Have Won", 0, 0, 2, 4)
             self.gui.getLabelWidget("Win").config(font=("Helvetica", "20", "bold"))
         if event == 'loose':
-            self.gui.addLabel("Loose", "You Lost", 0, 0, 2, 3)
+            self.gui.addLabel("Loose", "You Lost", 0, 0, 2, 4)
             self.gui.getLabelWidget("Loose").config(font=("Helvetica", "20", "bold"))
 
     def draw(self):
