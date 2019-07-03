@@ -189,6 +189,3 @@ class Game:
         self.player_A.print_player_board()
         print("\nPlayerB:")
         self.player_B.print_player_board()
-
-
-g = Game()
