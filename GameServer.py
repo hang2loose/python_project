@@ -10,50 +10,51 @@ app = socketio.WSGIApp(sio, static_files={
 players_list = []
 game_dict = {}
 players_dict = {}
-game_name = None
-game_id = 0
 
 
 def game_id_generator():
-    global game_id
+    game_id_var = 0
     while True:
-        game_id += 1
-        yield
+        yield game_id_var
+        game_id_var += 1
+
+
+game_name_generator = None
+game_id = game_id_generator()
 
 
 @sio.event
 def connect(sid, environ):
-    global game_name
+    global game_name_generator
     players_list.append(sid)
     print('connect ', sid)
 
     if len(players_list) % 2 == 1:
-        game_name = 'game_room_{}'.format(game_id)
-        sio.enter_room(sid, game_name)
-        game_dict.update({game_name: Game()})
+        game_name_generator = 'game_room_{}'.format(game_id.__next__())
+        sio.enter_room(sid, game_name_generator)
+        game_dict.update({game_name_generator: Game()})
         players_dict.update(
-            {game_name: {
-                game_dict[game_name].player_A: {
-                    "enemy": game_dict[game_name].player_B,
+            {game_name_generator: {
+                game_dict[game_name_generator].player_A: {
+                    "enemy": game_dict[game_name_generator].player_B,
                     "sid": sid
                 }
             }}
         )
 
     if len(players_list) % 2 == 0:
-        sio.enter_room(sid, game_name)
-        players_dict[game_name].update({
-                game_dict[game_name].player_B: {
-                    "enemy": game_dict[game_name].player_A,
+        sio.enter_room(sid, game_name_generator)
+        players_dict[game_name_generator].update({
+                game_dict[game_name_generator].player_B: {
+                    "enemy": game_dict[game_name_generator].player_A,
                     "sid": sid
                 }
             }
         )
         # starts game after 2 players are connected to the same game room
-        start_game(game_name)
-        game_id_generator().__next__()
+        start_game(game_name_generator)
 
-    sio.emit('game_room', game_name, sid)
+    sio.emit('game_room', game_name_generator, sid)
 
 
 @sio.event
