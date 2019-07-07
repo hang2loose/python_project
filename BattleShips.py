@@ -7,6 +7,10 @@ class Field:
         self.__state = FIELD_STATE.EMPTY
 
     def change_field_state(self, state: FIELD_STATE):
+        """
+        changes state of field instanz
+        :param state: new state
+        """
         self.__state = state
 
     def print_field(self):
@@ -25,12 +29,21 @@ class Ship:
         self.pos = ()
 
     def is_ship_alive(self):
+        """
+        tests if the ship instance is still alive
+        :return: true if at least one Field of the ship is still marked as SHIP_ALIVE
+        """
         for field in self.__occupied_fields:
             if field.get_state() is FIELD_STATE.SHIP_ALIVE:
                 return True
         return False
 
     def switch_orientation(self):
+        """
+        switches the orientation of the ship
+        :default: HORIZONTAL
+        :return:
+        """
         if self.__orientation is SHIP_ORIENTATION.HORIZONTAL:
             self.__orientation = SHIP_ORIENTATION.VERTIKAL
         else:
@@ -38,24 +51,31 @@ class Ship:
         return self.__orientation
 
     def occupie_fields(self, ship_fields, pos):
+        """
+        Links the Ship instance to the designated Board
+        :param ship_fields: board fields
+        :param pos:
+        """
         self.__occupied_fields = ship_fields
         self.pos = pos
         for field in self.__occupied_fields:
             field.change_field_state(FIELD_STATE.SHIP_ALIVE)
+
+    def to_event(self):
+        """
+        :returns an dict with the ship informations to send to the Clients
+        """
+        return {
+            "orientation": self.get_orientation().value,
+            "size": self.get_size(),
+            "pos": "{},{}".format(self.pos[0], self.pos[1])
+        }
 
     def get_orientation(self):
         return self.__orientation
 
     def get_size(self):
         return self.__size
-
-    def to_event(self):
-        tmp = {
-            "orientation": self.get_orientation().value,
-            "size": self.get_size(),
-            "pos": "{},{}".format(self.pos[0], self.pos[1])
-        }
-        return tmp
 
 
 class Board:
