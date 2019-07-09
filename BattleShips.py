@@ -144,6 +144,12 @@ class Board:
 
 class Player:
     def __init__(self, rules: dict):
+        """
+        @:var __player_board: board which holds the ships the player owns
+        @:var __enemy_board: board which holds represents the enemys board ( with the hits and misses of the player )
+        @:var __player_ships: a list of ships which the player owns
+        :param rules: game rules dict
+        """
         self.__player_board = Board(rules["boardsize"])
         self.__enemy_board = Board(rules["boardsize"])
         self.__player_ships = self.__retrieve_ships_from_rules(rules["shipList"])
