@@ -83,16 +83,30 @@ class Board:
         self.__size = size
         self.__board = self.create_board()
 
-    def create_board(self):
-        return tuple([tuple([Field() for column in range(self.__size)]) for row in range(self.__size)])
-
     def print_board(self):
+        """
+        prints the board to the console
+        """
         for row in self.__board:
             for field in row:
                 print("{} ".format(field.print_field()), end='')
             print()
 
+    def create_board(self):
+        """
+        creates an tuple of tuples of Field instances to represent an player board
+        :return: an tuple of tuples with Field instances
+        """
+        return tuple([tuple([Field() for column in range(self.__size)]) for row in range(self.__size)])
+
     def set_ship_on_board(self, ship: Ship, pos: tuple):
+        """
+        Sets an ship instance onto the board
+        :param ship: Ship instance
+        :param pos: tuple of a x and y positions
+        :returns: true if ship could be placed
+        :returns: false if an error occurs and the ship could not be set on board
+        """
         try:
             ship_fields = self.__get_ship_fields(ship, pos)
         except IndexError:
@@ -105,6 +119,17 @@ class Board:
         ship.occupie_fields(ship_fields, pos)
         return True
 
+    def change_field_state(self, pos: tuple, new_state: FIELD_STATE):
+        """
+        changes the state of the field of the board
+        :param pos: tuple of a x and y positions
+        :param new_state: New State Enum for the field instance
+        """
+        self.__get_field(pos).change_field_state(new_state)
+
+    def get_field_state(self, pos: tuple):
+        return self.__get_field(pos).get_state()
+
     def __get_ship_fields(self, ship: Ship, pos: tuple):
         if ship.get_orientation() == SHIP_ORIENTATION.HORIZONTAL:
             return [self.__get_field((pos[0] + h, pos[1])) for h in range(ship.get_size())]
@@ -113,12 +138,6 @@ class Board:
     def __get_field(self, pos: tuple):
         return self.__board[pos[1]][pos[0]]
 
-    def get_field_state(self, pos: tuple):
-        return self.__get_field(pos).get_state()
-
-    def change_field_state(self, pos: tuple, new_state: FIELD_STATE):
-        self.__get_field(pos).change_field_state(new_state)
-
 
 class Player:
     def __init__(self, rules: dict):
@@ -126,18 +145,21 @@ class Player:
         self.__enemy_board = Board(rules["boardsize"])
         self.__player_ships = self.__retrieve_ships_from_rules(rules["shipList"])
 
-    def __retrieve_ships_from_rules(self, ships_to_create: dict):
-        tmp_ship_list = []
-        for key in ships_to_create.keys():
-            tmp_ship_list.append([Ship(key) for i in range(ships_to_create[key])])
-        return tuple(tmp_ship_list)
-
     def print_player_board(self):
+        """
+        prints the player and enemy boards
+        """
         self.__player_board.print_board()
         print("---------------------")
         self.__enemy_board.print_board()
 
     def receive_shot(self, pos: tuple):
+        """
+        handles when a other player shoots at this player instance
+        :param pos: tuple of a x and y position
+        :returns: "hit" if a ship is hit
+        :returns: "miss" if no ship hit
+        """
         if self.__player_board.get_field_state(pos) is FIELD_STATE.SHIP_ALIVE:
             self.__player_board.change_field_state(pos, FIELD_STATE.SHIP_HIT)
             return "hit"
@@ -179,12 +201,17 @@ class Player:
                 self.__randomly_switch_ship_orientation(ship)
 
     def __generate_random_pos(self):
-        tmp = (random.randint(0, 9), random.randint(0, 9))
-        return tmp
+        return (random.randint(0, 9), random.randint(0, 9))
 
     def __randomly_switch_ship_orientation(self, ship: Ship):
         if random.randint(0, 100) % 2 is 1:
             ship.switch_orientation()
+
+    def __retrieve_ships_from_rules(self, ships_to_create: dict):
+        tmp_ship_list = []
+        for key in ships_to_create.keys():
+            tmp_ship_list.append([Ship(key) for i in range(ships_to_create[key])])
+        return tuple(tmp_ship_list)
 
 
 class Game:
