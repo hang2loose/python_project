@@ -3,6 +3,11 @@ import random
 
 
 class Field:
+    """
+    :param __state: State of the field
+    :type __statew: BattleShipsEnum
+    """
+
     def __init__(self, ):
         self.__state = FIELD_STATE.EMPTY
 
@@ -24,6 +29,12 @@ class Field:
 
 
 class Ship:
+    """
+    :param __occupied_fields: board fields which are occupied by the ship instance
+    :param __size: size of the ship
+    :param __orientation: Orientation of the ship can be horizontal or vertikal
+    :param pos: position of the start of the ship ( x, y )
+    """
 
     def __init__(self, ship_type: Ship_Type):
         self.__occupied_fields = []
@@ -82,6 +93,10 @@ class Ship:
 
 
 class Board:
+    """
+    :param __size: size of the board ( board is always square )
+    """
+
     def __init__(self, size: int):
         self.__size = size
         self.__board = self.create_board()
@@ -143,12 +158,15 @@ class Board:
 
 
 class Player:
+    """
+    :param __player_board: board which holds the ships the player owns
+    :param __enemy_board: board which holds represents the enemys board ( with the hits and misses of the player )
+    :param __player_ships: a list of ships which the player owns
+    """
+
     def __init__(self, rules: dict):
         """
-        @:var __player_board: board which holds the ships the player owns
-        @:var __enemy_board: board which holds represents the enemys board ( with the hits and misses of the player )
-        @:var __player_ships: a list of ships which the player owns
-        :param rules: game rules dict
+        :param rules: game rules dict to initalize the game boards and ships
         """
         self.__player_board = Board(rules["boardsize"])
         self.__enemy_board = Board(rules["boardsize"])
