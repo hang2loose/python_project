@@ -113,15 +113,15 @@ def disconnect(sid):
         sio.emit('game_over', 'win', player_a_sid)
         sio.disconnect(player_a_sid)
 
-    # dictionary clean up
-    del game_dict[game_room]
-    del players_dict[game_room]
-
     # clean up the players list
     if player_a_sid is not None:
         players_list.remove(player_a_sid)
     if player_b_sid is not None:
         players_list.remove(player_b_sid)
+
+    # dictionary clean up
+    del game_dict[game_room]
+    del players_dict[game_room]
 
     print('disconnect ', sid)
 
