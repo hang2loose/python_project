@@ -105,6 +105,7 @@ def disconnect(sid):
     player_a_sid = players_dict[game_room][game_dict[game_room].player_A]["sid"]
     player_b_sid = players_dict[game_room][game_dict[game_room].player_B]["sid"]
 
+    # send win event to the connected player and disconnect them
     if player_a_sid == sid:
         sio.emit('game_over', 'win', player_b_sid)
         sio.disconnect(player_b_sid)
@@ -112,18 +113,17 @@ def disconnect(sid):
         sio.emit('game_over', 'win', player_a_sid)
         sio.disconnect(player_a_sid)
 
+    # dictionary clean up
     del game_dict[game_room]
     del players_dict[game_room]
 
+    # clean up the players list
     if player_a_sid is not None:
         players_list.remove(player_a_sid)
     if player_b_sid is not None:
         players_list.remove(player_b_sid)
 
     print('disconnect ', sid)
-    print(game_dict)
-    print(players_dict)
-    print(players_list)
 
 
 @sio.on('shoot_at')
