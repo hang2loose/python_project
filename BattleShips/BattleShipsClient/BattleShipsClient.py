@@ -31,7 +31,7 @@ class EventHandler:
     def __init__(self, functions: dict):
         function_dict.update(functions)
         # Connect to server
-        self.sio.connect('http://192.168.0.1:8080')
+        self.sio.connect('http://192.168.0.10:8080')
 
     def gui_loaded(self):
         """ Send gui loaded event to server """
