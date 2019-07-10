@@ -23,7 +23,7 @@ game_dict = {}
 #                "game_room.player_a": {
 #                               "enemy": game_room.player_b,
 #                               "sid": socket_io_id
-#                }
+#                },
 #                "game_room.player_b": {
 #                               "enemy": game_room.player_b,
 #                               "sid": socket_io_id
@@ -70,20 +70,21 @@ def connect(sid, environ):
                 game_dict[game_room_name].player_A: {
                     "enemy": game_dict[game_room_name].player_B,
                     "sid": sid
-                }
+                },
+                game_dict[game_room_name].player_B: {
+                    "enemy": game_dict[game_room_name].player_A,
+                    "sid": None
+                },
+                "active": None
             }}
         )
+        print("Added 1st player to {}".format(game_room_name))
 
     # Even player_list: add connected player to the last generated game room
     if len(players_list) % 2 == 0:
         sio.enter_room(sid, game_room_name)
-        players_dict[game_room_name].update({
-                game_dict[game_room_name].player_B: {
-                    "enemy": game_dict[game_room_name].player_A,
-                    "sid": sid
-                }
-            }
-        )
+        players_dict[game_room_name][game_dict[game_room_name].player_B]["sid"] = sid
+        print("Added 2nd player to {}".format(game_room_name))
 
         # Starts game after 2 players are connected to the same game room
         start_game(game_room_name)
@@ -99,11 +100,18 @@ def disconnect(sid):
     :param sid: socket-io id
     """
     game_room = next((room for room, entry in players_dict.items() for key, value in entry.items() if value["sid"] == sid), None)
+    player_a = players_dict[game_room][game_dict[game_room].player_A]["sid"]
+    player_b = players_dict[game_room][game_dict[game_room].player_B]["sid"]
 
-    if players_dict[game_room][game_dict[game_room].player_A]["sid"] == sid:
-        sio.emit('game_over', 'win', players_dict[game_room][game_dict[game_room].player_B]["sid"])
-    if players_dict[game_room][game_dict[game_room].player_B]["sid"] == sid:
-        sio.emit('game_over', 'win', players_dict[game_room][game_dict[game_room].player_A]["sid"])
+    if player_b is not None:
+        if player_a == sid:
+            sio.emit('game_over', 'win', player_b)
+        if player_b == sid:
+            sio.emit('game_over', 'win', player_a)
+    else:
+        game_dict.pop(game_room)
+        players_dict.pop(game_room)
+        players_list.remove(player_a)
 
     # TODO: Cleanup lists to reduce their size on disconnects
     # players_list.remove(sid)
@@ -138,9 +146,9 @@ def gui_loaded(sid, payload):
     :param payload: message send by client
     """
     print(payload)
-    if len(players_dict[payload]) is 1:
+    if players_dict[payload][game_dict[payload].player_B]["sid"] is None:
         sio.emit('player', 'wait', sid)
-    if len(players_dict[payload]) is 3:
+    else:
         sio.emit('player', 'start', players_dict[payload][game_dict[payload].player_A]["sid"])
         sio.emit('turn', 'wait', players_dict[payload][game_dict[payload].player_B]["sid"])
 
